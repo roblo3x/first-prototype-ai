@@ -1,0 +1,2175 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<title>Первый прототип с ИИ</title>
+<meta name="description" content="Пошаговый гайд для продуктовых дизайнеров: первый интерактивный прототип с ИИ за 10 шагов.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&family=Roboto+Flex:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: one airy reading column (680px) like a Medium story; steps unlock one at a time; a dark full-bleed interlude explains how the model works */
+:root{
+  --bg:#FFFFFF;
+  --bg-2:#F4F5F7;
+  --ink:#0B0C0F;
+  --ink-2:#3A3E46;
+  --ink-3:#6B707A;
+  --line:#E6E8EC;
+  --accent:#2B44E0;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#EDEFFD;
+  --ok:#137A50;
+  --pin:#E5335F;
+  --lr-bg:#0E0F12;
+  --lr-card:#17191E;
+  --lr-ink:#F4F5F7;
+  --lr-ink-2:#A9AEB8;
+  --lr-line:#2A2D34;
+  --c-time:#5BD69F;
+  --c-ring:#9AA6FF;
+  --c-btn:#FFB35C;
+  --f-text:'TT Travels','TT Travels Next','Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-body:'TT Travels Next Compact','TT Travels Compact','TT Travels Next','Inter Tight','Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#0E0F12;--bg-2:#1A1C21;--ink:#F4F5F7;--ink-2:#C9CDD5;--ink-3:#959BA6;--line:#2A2E36;--accent:#8C9BFF;--accent-ink:#0E0F12;--accent-soft:#1F2442;--ok:#55CF97;--pin:#FF5C82;--lr-bg:#060709;--lr-card:#121419;color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#0E0F12;--bg-2:#1A1C21;--ink:#F4F5F7;--ink-2:#C9CDD5;--ink-3:#959BA6;--line:#2A2E36;--accent:#8C9BFF;--accent-ink:#0E0F12;--accent-soft:#1F2442;--ok:#55CF97;--pin:#FF5C82;--lr-bg:#060709;--lr-card:#121419;color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:20px;line-height:1.7;letter-spacing:.003em;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+h1,h2,h3{font-family:var(--f-text);margin:0;text-wrap:balance;color:var(--ink)}
+p{margin:0}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* top bar: barely there */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.topbar-in{max-width:1080px;margin:0 auto;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.tb-title{font-family:var(--f-text);font-weight:700;font-size:15px;color:var(--ink);text-decoration:none}
+.tb-count{font-size:14px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tb-bar{height:2px;background:transparent}
+.tb-bar i{display:block;height:100%;width:0;background:var(--ink);transition:width .5s cubic-bezier(.2,0,0,1)}
+
+/* article column */
+.article{max-width:680px;margin:0 auto;padding-bottom:120px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.hero{padding-top:72px;display:flex;flex-direction:column;gap:20px}
+.kicker,.ch-kicker{font-family:var(--f-body);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.hero h1{font-size:clamp(42px,7vw,64px);line-height:1.03;letter-spacing:-.03em;font-weight:700}
+.subtitle{font-size:clamp(20px,2.6vw,24px);line-height:1.45;color:var(--ink-2)}
+.byline{display:flex;flex-wrap:wrap;gap:6px 22px;padding-block:16px;margin-top:8px;border-block:1px solid var(--line);font-size:15px;color:var(--ink-3)}
+.hero-fig{margin:48px auto 0;width:min(100vw,860px);margin-left:50%;transform:translateX(-50%);padding:48px 20px 28px;background:var(--bg-2);display:flex;flex-direction:column;align-items:center;gap:18px}
+@media (min-width:860px){.hero-fig{border-radius:28px}}
+.hero-fig figcaption{font-size:15px;color:var(--ink-3);text-align:center}
+.start-row{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:40px}
+.start-hint{font-size:20px;color:var(--ink-2)}
+.link-btn{border:0;background:none;padding:0;font-size:15px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.link-btn:hover{color:var(--ink)}
+.sep{text-align:center;letter-spacing:.7em;font-size:22px;color:var(--ink-3);margin:64px 0 24px}
+
+/* steps */
+.step{padding-block:40px 24px;scroll-margin-top:72px}
+.step-h{display:flex;flex-direction:column;gap:10px}
+.step-no{font-size:14px;font-weight:600;letter-spacing:.04em;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.step h2{font-size:clamp(30px,4.6vw,40px);line-height:1.12;letter-spacing:-.02em;font-weight:700}
+.step-body{display:flex;flex-direction:column;gap:26px;margin-top:26px}
+.step-foot{margin-top:36px}
+.locked-note{display:none}
+.gate.locked .step-body,.gate.locked .step-foot,.gate.locked .mode{display:none}
+.gate.locked .locked-note{display:block;font-size:15px;color:var(--ink-3);margin-top:6px}
+.gate.locked{padding-block:18px}
+.gate.locked h2{font-size:22px;color:var(--ink-3);font-weight:600}
+.gate.locked .step-no{color:var(--ink-3);opacity:.7}
+.step.done .step-no::after{content:" · выполнено";color:var(--ok)}
+.step.just-opened .step-h,.step.just-opened .step-body{animation:rise .7s cubic-bezier(.2,0,0,1) both}
+.step.just-opened .step-body{animation-delay:.08s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+.next{display:inline-flex;align-items:center;gap:12px;border:0;cursor:pointer;background:var(--ink);color:var(--bg);font-size:17px;font-weight:600;padding:15px 24px;border-radius:999px;transition:transform .15s ease-out,opacity .2s}
+.next span{transition:transform .2s ease-out}
+.next:hover span{transform:translateX(4px)}
+.next:active{transform:scale(.97)}
+.step.done .next{background:var(--bg-2);color:var(--ink-2)}
+
+/* text blocks inside steps */
+.todo{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px;counter-reset:todo}
+.todo li{position:relative;padding-left:44px;line-height:1.55;counter-increment:todo}
+.todo li::before{content:counter(todo);position:absolute;left:0;top:.05em;width:28px;height:28px;border-radius:50%;background:var(--bg-2);color:var(--ink);font-size:14px;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.why{font-size:17px;line-height:1.65;color:var(--ink-2);padding-left:20px;border-left:3px solid var(--line)}
+.why b{color:var(--ink);font-weight:600}
+.pick{display:flex;flex-direction:column;gap:12px}
+.pick-label{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.pv-grid{display:flex;flex-wrap:wrap;gap:8px}
+.pv{display:inline-flex;align-items:center;border:0;cursor:pointer;background:var(--bg);color:var(--ink);padding:9px 16px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .15s,background .15s}
+.pv:hover{box-shadow:inset 0 0 0 1px var(--ink-3)}
+.pv b{font-size:15px;font-weight:600}
+.pv span{display:none}
+.pv[aria-pressed="true"]{background:var(--ink);box-shadow:none}
+.pv[aria-pressed="true"] b{color:var(--bg)}
+.pv-note{font-size:16px;color:var(--ink-3)}
+.ref{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.ref img{width:200px;max-width:100%;border-radius:16px;box-shadow:0 0 0 1px var(--line)}
+.ref p{font-size:17px;color:var(--ink-2);flex:1;min-width:200px}
+
+/* model chip */
+.mode{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:14px;color:var(--ink-3)}
+.mode b{font-weight:600;color:var(--ink-2)}
+.mode i{font-style:normal;padding:2px 9px;border-radius:999px;font-weight:600;font-size:12px}
+.mode i.on{background:var(--accent-soft);color:var(--accent)}
+.mode i.off{background:var(--bg-2);color:var(--ink-3)}
+.models{display:flex;flex-direction:column;border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.model-row{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 18px;padding:16px 20px;font-size:16px;line-height:1.5}
+.model-row + .model-row{border-top:1px solid var(--line)}
+.model-row b{font-weight:700;grid-row:span 2}
+.model-name{font-weight:700}
+.model-use{color:var(--ink-2);font-size:15px}
+.think{display:flex;flex-direction:column;gap:12px;font-size:17px;line-height:1.65;color:var(--ink-2)}
+.think > b{color:var(--ink);font-size:20px;font-family:var(--f-text)}
+.think p b{color:var(--ink);font-weight:600}
+@media (max-width:480px){.model-row{grid-template-columns:minmax(0,1fr)}.model-row b{grid-row:auto}}
+
+/* prompt = code block */
+.prompt{border-radius:14px;box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;background:var(--bg)}
+.prompt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 8px 8px 16px;background:var(--bg-2)}
+.prompt-tag{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:.02em}
+.copy{border:0;cursor:pointer;background:var(--bg);color:var(--ink);font-size:13px;font-weight:600;padding:7px 13px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.copy:hover{box-shadow:inset 0 0 0 1px var(--ink-3)}
+.copy.ok{background:var(--ok);color:#fff;box-shadow:none}
+.prompt pre{margin:0;padding:18px 20px 22px;font-family:var(--f-mono);font-size:14px;line-height:1.8;white-space:pre-wrap;word-break:break-word;color:var(--ink);letter-spacing:0}
+.prompts{display:flex;flex-direction:column;gap:12px}
+.verify{display:flex;flex-direction:column;gap:14px;padding:22px 24px;border-radius:16px;background:var(--bg-2)}
+.verify-title{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.verify-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.5}
+.verify-list li{position:relative;padding-left:30px}
+.verify-list li::before{content:"";position:absolute;left:0;top:.2em;width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+
+/* dialog in step 8 */
+.chat{display:flex;flex-direction:column;gap:30px;padding-top:10px}
+.chat-title{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.msg{display:flex;flex-direction:column;gap:10px;min-width:0}
+.msg.me{align-items:flex-end}
+.who{font-size:13px;font-weight:600;color:var(--ink-3)}
+.bubble{padding:14px 18px;border-radius:20px;border-top-left-radius:6px;background:var(--bg-2);font-size:17px;line-height:1.55;max-width:540px}
+.msg.me .prompt{width:100%;box-shadow:inset 0 0 0 1.5px var(--ink)}
+.msg.me .prompt-head{background:var(--ink)}
+.msg.me .prompt-tag{color:var(--bg)}
+.thought{align-self:flex-end;max-width:520px;font-size:17px;line-height:1.55;color:var(--ink-2);text-align:right;font-style:italic}
+.thought b{display:block;font-style:normal;font-size:13px;font-weight:600;color:var(--ink-3);margin-bottom:4px}
+.iter{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.iter-side{flex:1;min-width:200px;display:flex;flex-direction:column;gap:12px;font-size:16px;line-height:1.55;color:var(--ink-2)}
+.iter-side .ver{font-size:14px;font-weight:700;color:var(--ink)}
+.pins{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.pins li{display:flex;gap:10px;align-items:flex-start}
+.pins i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--pin);color:#fff;font-style:normal;font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:2px}
+.verdict{font-size:16px;line-height:1.55;color:var(--ink-2)}
+.verdict.good{color:var(--ok);font-weight:600}
+
+/* finish */
+.finish{scroll-margin-top:72px}
+.fin-in{display:flex;flex-direction:column;gap:24px}
+.fin-title{font-size:clamp(36px,6vw,54px);line-height:1.05;letter-spacing:-.03em}
+.fin-lead{font-size:22px;line-height:1.5;color:var(--ink-2)}
+.chapter-part{display:flex;flex-direction:column;gap:22px;padding-top:56px}
+.chapter-part h2{font-size:clamp(28px,4.4vw,36px);line-height:1.12;letter-spacing:-.02em}
+.chapter-part h3{font-size:21px;margin-top:10px}
+.ch-lead{font-size:20px;line-height:1.55;color:var(--ink-2)}
+.ap-tabs{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2);align-self:flex-start;flex-wrap:wrap}
+.ap-tabs button{border:0;background:none;padding:9px 18px;border-radius:999px;font-weight:600;font-size:15px;color:var(--ink-2);cursor:pointer}
+.ap-tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.ap-panel{display:flex;flex-direction:column;gap:20px;animation:rise .4s cubic-bezier(.2,0,0,1)}
+.ap-big{font-family:var(--f-text);font-size:24px;line-height:1.35;font-weight:600;letter-spacing:-.01em}
+.ap-facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.ap-facts li{background:var(--bg);padding:14px 16px;font-size:15px;line-height:1.5;display:flex;flex-direction:column;gap:4px}
+.ap-facts b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.ap-steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;line-height:1.6}
+.ap-note{font-size:17px;color:var(--ink-2)}
+.tbl-wrap{overflow-x:auto;border-radius:14px;box-shadow:inset 0 0 0 1px var(--line)}
+.tbl-wrap table{border-collapse:collapse;width:100%;min-width:600px;font-size:15px;line-height:1.5}
+.tbl-wrap th,.tbl-wrap td{padding:13px 15px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.tbl-wrap th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700;background:var(--bg-2)}
+.tbl-wrap td{color:var(--ink-2)}
+.tbl-wrap td:first-child{font-weight:700;color:var(--ink)}
+.tbl-wrap tr.pick td{background:color-mix(in srgb,var(--ok) 9%,var(--bg))}
+.tbl-wrap tr:last-child td{border-bottom:0}
+.rules ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:14px;line-height:1.6}
+.rules li::marker{font-weight:700;color:var(--ink-3)}
+.rules span{color:var(--ink-2)}
+.lr-locked{display:none}
+.gate.locked > :not(.lr-locked){display:none!important}
+.gate.locked > .lr-locked{display:flex;flex-direction:column;gap:4px;padding:22px 0;color:var(--ink-3);font-size:15px}
+.gate.locked > .lr-locked b{font-family:var(--f-text);font-size:22px;font-weight:600;color:var(--ink-3)}
+.foot{margin-top:72px;font-size:14px;color:var(--ink-3);text-align:center}
+
+/* phone hosts, sample */
+.wm-host{display:flex;flex-direction:column;align-items:center;gap:12px;flex:none}
+.speed{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2)}
+.speed button{border:0;background:none;color:var(--ink-2);font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.again{border:0;background:var(--bg-2);color:var(--ink);font-size:14px;font-weight:600;padding:9px 16px;border-radius:999px;cursor:pointer}
+.sample-pill{position:fixed;z-index:40;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));border:0;cursor:pointer;background:var(--bg);color:var(--ink);font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 0 0 1px var(--line),0 10px 30px -10px rgba(0,0,0,.25);animation:rise .4s cubic-bezier(.2,0,0,1)}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);display:grid;place-items:center;padding:20px;animation:fade .25s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-card{position:relative;background:var(--bg);border-radius:28px;padding:36px 28px 24px;max-height:calc(100vh - 40px);overflow:auto}
+.modal-x{position:absolute;right:12px;top:10px;border:0;background:var(--bg-2);color:var(--ink);width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}
+.device{border-radius:13%/6%;background:#1A1A1C;box-shadow:0 0 0 1px var(--line),0 30px 60px -30px rgba(0,0,0,.45);flex:none;position:relative}
+.device-in{position:absolute;overflow:hidden;background:#000}
+
+/* ===== longread interlude ===== */
+.longread{position:relative;width:100vw;margin-left:calc(50% - 50vw);margin-block:40px;scroll-margin-top:52px}
+.longread:not(.locked){background:var(--lr-bg);color:var(--lr-ink);padding:120px 0 96px}
+.longread.locked{width:auto;margin-left:0;margin-block:0}
+.lr-in{max-width:1160px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.lr-head{max-width:720px;display:flex;flex-direction:column;gap:20px;padding-bottom:24px}
+.lr-kicker{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--c-ring)}
+.lr-title{font-size:clamp(38px,6vw,64px);line-height:1.03;letter-spacing:-.03em;font-weight:700;color:var(--lr-ink)}
+.lr-lead{font-size:clamp(19px,2vw,23px);line-height:1.5;color:var(--lr-ink-2);max-width:620px}
+.lr-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:80px;align-items:start}
+.scene{min-height:86vh;display:flex;flex-direction:column;justify-content:center;gap:18px;padding-block:8vh}
+.sc-n{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--lr-ink-2)}
+.sc-big{font-family:var(--f-text);font-size:clamp(30px,3.4vw,44px);line-height:1.12;letter-spacing:-.02em;font-weight:700;color:var(--lr-ink);text-wrap:balance}
+.sc-small{font-size:clamp(18px,1.6vw,21px);line-height:1.6;color:var(--lr-ink-2);max-width:520px}
+.scene > *{opacity:.35;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,0,0,1),transform .8s cubic-bezier(.2,0,0,1)}
+.scene .sc-big{transition-delay:.06s}.scene .sc-small{transition-delay:.16s}
+.scene.on > *,.scene.seen > *{opacity:1;transform:none}
+.lr-end{padding:6vh 0 4vh}
+.lr-end .next{background:var(--lr-ink);color:var(--lr-bg)}
+.lr-stick{position:sticky;top:calc(env(safe-area-inset-top,0px) + 80px);height:calc(100vh - 120px);max-height:620px;display:flex;align-items:center}
+
+.sim{position:relative;width:100%;height:100%;border-radius:22px;background:var(--lr-card);box-shadow:0 0 0 1px var(--lr-line),0 40px 90px -40px rgba(0,0,0,.9);overflow:hidden;display:flex;flex-direction:column;font-family:var(--f-body);color:var(--lr-ink)}
+.sim-head{height:46px;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--lr-ink-2);border-bottom:1px solid var(--lr-line)}
+.sim-body{position:relative;flex:1;min-height:0}
+.sp{position:absolute;inset:0;padding:20px;display:flex;flex-direction:column;opacity:0;transform:translateY(16px);transition:opacity .5s cubic-bezier(.2,0,0,1),transform .5s cubic-bezier(.2,0,0,1);pointer-events:none}
+.sp.show{opacity:1;transform:none;pointer-events:auto}
+
+/* chat panel */
+.sp-chat{justify-content:flex-end;gap:14px}
+.feed{display:flex;flex-direction:column;gap:16px;min-height:0;overflow:hidden;justify-content:flex-end;flex:1}
+.b-user{flex:none;align-self:flex-end;width:72%;background:#2B2F38;border-radius:20px 20px 6px 20px;padding:10px;display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateY(20px) scale(.97);transform-origin:bottom right;transition:opacity .45s cubic-bezier(.2,0,0,1),transform .45s cubic-bezier(.34,1.3,.64,1),width .5s cubic-bezier(.2,0,0,1)}
+.b-user.in{opacity:1;transform:none}
+.bu-img{position:relative;width:100%;max-width:150px;border-radius:12px;overflow:hidden;transition:max-width .5s cubic-bezier(.2,0,0,1)}
+.bu-img img{display:block;width:100%;height:auto}
+.bu-text{font-size:15px;line-height:1.5;padding:0 6px 4px}
+.bu-text mark{background:none;color:inherit;border-radius:4px;padding:0 1px;transition:background .4s,color .4s}
+.sim[data-scene="2"] .bu-img{max-width:260px}
+.sim[data-scene="2"] .b-user{width:88%}
+.hl .m-time{background:color-mix(in srgb,var(--c-time) 28%,transparent);color:#E7FFF3}
+.hl .m-ring{background:color-mix(in srgb,var(--c-ring) 30%,transparent);color:#EEF0FF}
+.hl .m-btn{background:color-mix(in srgb,var(--c-btn) 30%,transparent);color:#FFF3E3}
+.bx{position:absolute;border:2px solid;border-radius:6px;opacity:0;transform:scale(.85);transition:opacity .4s,transform .45s cubic-bezier(.34,1.4,.64,1)}
+.bx-time{border-color:var(--c-time);left:41%;top:33%;width:18%;height:9%}
+.bx-ring{border-color:var(--c-ring);left:33%;top:24%;width:34%;height:34%;border-radius:50%}
+.bx-btn{border-color:var(--c-btn);left:41%;top:77%;width:18%;height:10%;border-radius:20px}
+.hl .bx{opacity:1;transform:none}
+.hl .bx-ring{transition-delay:.25s}.hl .bx-btn{transition-delay:.5s}
+.b-model{align-self:flex-start;width:86%;display:none;flex-direction:column;gap:10px}
+.b-model.in{display:flex;animation:rise .5s cubic-bezier(.2,0,0,1) both}
+.bm-who{font-size:12px;font-weight:600;color:var(--lr-ink-2)}
+.bm-think{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--lr-ink-2)}
+.dots{display:inline-flex;gap:4px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--c-ring);animation:pulse 1.2s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes pulse{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:1;transform:none}}
+.bm-plan{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.bm-plan li{font-size:14px;line-height:1.45;padding:10px 12px 10px 36px;position:relative;background:#1F2228;border-radius:12px;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s cubic-bezier(.2,0,0,1)}
+.bm-plan li::before{content:"✓";position:absolute;left:12px;top:10px;width:16px;height:16px;border-radius:50%;background:var(--c-time);color:#0E0F12;font-size:10px;font-weight:800;display:grid;place-items:center}
+.bm-plan li.on{opacity:1;transform:none}
+.sim[data-scene="3"] .b-user{width:60%}
+.sim[data-scene="3"] .bu-img{max-width:70px}
+.sim[data-scene="3"] .bu-text mark{background:none;color:inherit}
+.composer{flex:none;border-radius:18px;background:#1F2228;box-shadow:inset 0 0 0 1px var(--lr-line);padding:10px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:end;transition:opacity .4s,max-height .5s}
+.cmp-att{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lr-ink-2)}
+.cmp-att img{width:34px;height:34px;object-fit:cover;border-radius:8px}
+.cmp-line{font-size:15px;line-height:1.45;min-height:22px;position:relative}
+.cmp-ph{color:#6E737D}
+.caret{display:inline-block;width:2px;height:1em;background:var(--lr-ink);vertical-align:-2px;margin-left:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.cmp-send{width:32px;height:32px;border-radius:50%;background:#3A3E47;color:#8E929B;display:grid;place-items:center;font-weight:700;transition:background .25s,color .25s,transform .15s}
+.cmp-send.ready{background:var(--lr-ink);color:var(--lr-bg)}
+.cmp-send.press{transform:scale(.85)}
+.sim:not([data-scene="1"]) .composer .cmp-att{display:none}
+
+/* tech choice */
+.sp-tech{justify-content:center;gap:10px}
+.tq{font-family:var(--f-text);font-size:19px;font-weight:600;margin-bottom:6px}
+.opt{position:relative;display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:14px;box-shadow:inset 0 0 0 1px var(--lr-line);opacity:0;transform:translateX(-10px);transition:opacity .4s,transform .4s cubic-bezier(.2,0,0,1),box-shadow .4s,background .4s}
+.opt b{font-size:16px}
+.opt span{font-size:13px;color:var(--lr-ink-2)}
+.opt i{position:absolute;right:14px;top:50%;margin-top:-12px;width:24px;height:24px;border-radius:50%;background:var(--c-time);color:#0E0F12;font-style:normal;font-weight:800;font-size:13px;display:grid;place-items:center;opacity:0;transform:scale(.4);transition:opacity .3s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+.sp-tech.s1 .opt{opacity:1;transform:none}
+.sp-tech.s1 .opt:nth-of-type(2){transition-delay:.08s}.sp-tech.s1 .opt:nth-of-type(3){transition-delay:.16s}.sp-tech.s1 .opt:nth-of-type(4){transition-delay:.24s}
+.sp-tech.s2 .opt-web{box-shadow:inset 0 0 0 2px var(--c-time);background:color-mix(in srgb,var(--c-time) 9%,transparent)}
+.sp-tech.s2 .opt-web i{opacity:1;transform:none}
+.sp-tech.s2 .opt:not(.opt-web){opacity:.35}
+.why-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.why-chips span{font-size:12.5px;padding:6px 11px;border-radius:999px;background:color-mix(in srgb,var(--c-time) 14%,transparent);color:var(--c-time);opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.sp-tech.s3 .why-chips span{opacity:1;transform:none}
+.sp-tech.s3 .why-chips span:nth-child(2){transition-delay:.12s}.sp-tech.s3 .why-chips span:nth-child(3){transition-delay:.24s}
+
+/* build */
+.sp-build{display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:16px}
+.sb-code{border-radius:14px;background:#0B0C0F;box-shadow:inset 0 0 0 1px var(--lr-line);display:flex;flex-direction:column;min-height:0;overflow:hidden;transition:opacity .4s}
+.sb-tabs{display:flex;gap:4px;padding:8px 10px 0}
+.sb-tabs span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;color:var(--lr-ink-2)}
+.sb-tabs span.on{background:#262A33;color:var(--lr-ink)}
+.sb-pre{margin:0;padding:10px 14px 14px;font-family:var(--f-mono);font-size:12.5px;line-height:1.7;color:#C9D1FF;white-space:pre-wrap;overflow:hidden;flex:1}
+.sb-prev{border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow:inset 0 0 0 1px var(--lr-line);background:#fff}
+.sb-label{flex:none;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;color:#6B707A;background:#F1F2F5}
+.sim[data-scene="8"] .sp-build{grid-template-rows:0fr 1fr}
+.sim[data-scene="8"] .sb-code{opacity:0}
+.pw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:background .5s,color .5s}
+.pw.l1{background:#fff;color:#000;font-family:'Times New Roman',Times,serif;align-items:flex-start;justify-content:flex-start;padding:14px;gap:2px}
+.pw.l1 .pw-time,.pw.l1 .pw-label{font-size:16px}
+.pw.l1 .pw-btn{font:13px system-ui,sans-serif;padding:1px 6px;border:1px solid #767676;border-radius:3px;background:#efefef;color:#000;margin-top:4px}
+.pw.l1 .pw-ico{display:none}
+.pw.l2,.pw.l3{background:#000;color:#fff;font-family:'Google Sans','Google Sans Flex',system-ui,sans-serif}
+.pw.l2 .pw-time,.pw.l3 .pw-time{font-size:36px;line-height:1.1}
+.pw.l2 .pw-label,.pw.l3 .pw-label{font-size:12px;color:#8E8E93}
+.pw.l2 .pw-btn,.pw.l3 .pw-btn{width:52px;height:52px;border-radius:50%;border:0;background:#C9E3FB;margin-top:12px;display:grid;place-items:center;transition:transform .12s}
+.pw.l2 .pw-txt,.pw.l3 .pw-txt{display:none}
+.pw-ico{width:14px;height:14px;display:block;background:linear-gradient(90deg,#0B1D2E 0 35%,transparent 35% 65%,#0B1D2E 65%)}
+.pw.paused .pw-ico{background:#0B1D2E;clip-path:polygon(15% 0,100% 50%,15% 100%)}
+.pw.l3 .pw-btn{cursor:pointer}
+.pw.l3 .pw-btn:active{transform:scale(.9)}
+.sim[data-scene="8"] .pw .pw-time{font-size:52px}
+.sim[data-scene="8"] .pw .pw-btn{width:66px;height:66px}
+
+/* diff */
+.sp-diff{justify-content:center;gap:16px}
+.df-q{align-self:flex-end;background:#2B2F38;border-radius:20px 20px 6px 20px;padding:12px 16px;font-size:15px}
+.df-code{display:flex;flex-direction:column;gap:6px}
+.dl{display:grid;grid-template-columns:110px minmax(0,1fr);align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#0B0C0F;box-shadow:inset 0 0 0 1px var(--lr-line);transition:background .4s,box-shadow .4s,opacity .4s,transform .4s}
+.dl code{font-family:var(--f-mono);font-size:12.5px;color:#C9D1FF}
+.dt{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--lr-ink-2)}
+.dl-new{opacity:0;transform:translateY(-6px)}
+.sp-diff.s1 .dl-old{background:color-mix(in srgb,#FF5C82 14%,#0B0C0F);box-shadow:inset 0 0 0 1px #FF5C82}
+.sp-diff.s1 .dl-old code{text-decoration:line-through;color:#FFA3B8}
+.sp-diff.s1 .dl-old .dt{color:#FF8FA9}
+.sp-diff.s2 .dl-new{opacity:1;transform:none;background:color-mix(in srgb,var(--c-time) 14%,#0B0C0F);box-shadow:inset 0 0 0 1px var(--c-time)}
+.sp-diff.s2 .dl-new .dt,.sp-diff.s2 .dl-new code{color:#9EF0C6}
+.sp-diff.s3 .dl-near{background:color-mix(in srgb,var(--c-btn) 14%,#0B0C0F);box-shadow:inset 0 0 0 1px var(--c-btn)}
+.sp-diff.s3 .dl-near .dt,.sp-diff.s3 .dl-near code{color:#FFD39E}
+.df-note{font-size:14px;line-height:1.5;color:var(--lr-ink-2);opacity:0;transition:opacity .4s}
+.sp-diff.s3 .df-note{opacity:1}
+
+@media (max-width:899px){
+  .longread:not(.locked){padding:88px 0 56px}
+  .lr-grid{grid-template-columns:minmax(0,1fr);gap:0}
+  .lr-stick{order:-1;top:calc(env(safe-area-inset-top,0px) + 54px);height:56vh;max-height:500px;z-index:2;background:var(--lr-bg);padding:10px 0 14px}
+  .scene{min-height:72vh;justify-content:flex-start;padding-block:5vh}
+  .sp{padding:14px}
+  .bu-img{max-width:150px}
+}
+@media (max-width:560px){
+  body{font-size:18px}
+  .todo li{padding-left:40px}
+  .hero{padding-top:48px}
+}
+@media (prefers-reduced-motion: reduce){
+  .scene > *{opacity:1;transform:none}
+  .sp,.b-user,.b-model,.bm-plan li,.opt,.why-chips span,.bx,.dl,.next,.step.just-opened .step-h,.step.just-opened .step-body{transition:none;animation:none}
+  .caret,.dots i{animation:none}
+}
+
+/* technology options as cards */
+.opts{display:flex;flex-direction:column;gap:12px}
+.opt-card{border-radius:16px;padding:20px 22px;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:6px}
+.opt-card.is-default{box-shadow:inset 0 0 0 1.5px var(--ok);background:color-mix(in srgb,var(--ok) 5%,var(--bg))}
+.opt-card header{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.opt-card header b{font-family:var(--f-text);font-size:21px;font-weight:700;letter-spacing:-.01em}
+.opt-tag{font-size:12px;font-weight:700;letter-spacing:.04em;padding:3px 10px;border-radius:999px;background:var(--ok);color:#fff}
+.opt-sub{font-size:16px;color:var(--ink-3)}
+.opt-card dl{margin:10px 0 0;display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 16px;font-size:16px;line-height:1.5}
+.opt-card dt{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:3px}
+.opt-card dd{margin:0;color:var(--ink-2)}
+@media (max-width:520px){.opt-card dl{grid-template-columns:minmax(0,1fr);gap:2px}.opt-card dd{margin-bottom:8px}}
+
+/* ===== video explainers: a scripted screen-recording player (its own fixed light UI world) ===== */
+.vx{display:flex;flex-direction:column;gap:10px}
+.vx-stage{position:relative;width:100%;aspect-ratio:16/10;max-width:100%;border-radius:16px;overflow:hidden;background:#EDEEF1;box-shadow:0 0 0 1px var(--line),0 24px 50px -30px rgba(0,0,0,.35)}
+.vx-inner{position:absolute;left:0;top:0;width:960px;height:600px;transform-origin:0 0;font-family:'Inter Tight','Manrope',system-ui,sans-serif;color:#1A1B1F;font-size:15px;line-height:1.4;letter-spacing:0}
+.vx-inner button{font-family:inherit}
+.vx-big{position:absolute;inset:0;margin:auto;width:84px;height:84px;border-radius:50%;border:0;cursor:pointer;background:rgba(11,12,15,.86);color:#fff;font-size:26px;display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .15s}
+.vx-big:hover{transform:scale(1.05)}
+.vx-big span{margin-left:4px}
+.vx-big.replay span{margin-left:0}
+.vx-ctrl{display:flex;align-items:center;gap:12px}
+.vx-pp,.vx-re{flex:none;width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;background:var(--bg-2);color:var(--ink);font-size:13px;font-weight:700;display:grid;place-items:center}
+.vx-track{flex:1;height:4px;border-radius:2px;background:var(--bg-2);overflow:hidden}
+.vx-track i{display:block;height:100%;width:0;background:var(--ink)}
+.vx-time{flex:none;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:74px;text-align:right}
+.vx-note{font-size:14px;color:var(--ink-3);line-height:1.5}
+
+/* browser window */
+.m-win{position:absolute;inset:14px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px #DADCE1,0 10px 30px -12px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column}
+.m-bar{height:44px;flex:none;display:flex;align-items:center;padding:0 14px;background:#F3F4F6;border-bottom:1px solid #E3E5E9}
+.m-url{flex:1;max-width:520px;margin:0 auto;height:28px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px #E1E3E8;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:14px;color:#3A3D44}
+.m-lock{width:9px;height:11px;border-radius:2px;background:#9CA1AB;position:relative}
+.m-lock::before{content:"";position:absolute;left:1.5px;top:-5px;width:6px;height:7px;border:1.5px solid #9CA1AB;border-bottom:0;border-radius:4px 4px 0 0}
+.m-url-t:empty::after{content:"Введите адрес";color:#A3A7AF}
+.m-blank{flex:1;display:none;align-items:center;justify-content:center;color:#A3A7AF;font-size:18px}
+.st-blank .m-blank{display:flex}
+.st-blank .m-app{display:none}
+.m-app{flex:1;min-height:0;display:flex}
+.m-side{width:196px;flex:none;background:#F7F7F8;border-right:1px solid #ECEDF0;padding:16px 12px;display:flex;flex-direction:column;gap:14px}
+.m-brand{font-weight:700;font-size:17px;padding:0 6px}
+.m-new{border:0;text-align:left;background:#fff;box-shadow:inset 0 0 0 1px #E3E5E9;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:600;color:#1A1B1F;transition:background .2s}
+.m-new.pressed{background:#E9EBF0}
+.m-hist{display:flex;flex-direction:column;gap:10px;padding:6px}
+.m-hist i{display:block;height:9px;border-radius:5px;background:#E6E7EB}
+.m-hist i:nth-child(2){width:80%}.m-hist i:nth-child(3){width:65%}.m-hist i:nth-child(4){width:72%}
+.m-main{flex:1;min-width:0;position:relative;display:flex;flex-direction:column}
+.m-head{height:52px;flex:none;display:flex;align-items:center;padding:0 18px}
+.m-model{border:0;background:none;font-size:15px;font-weight:600;color:#1A1B1F;padding:7px 10px;border-radius:8px;transition:background .2s}
+.m-model.pressed{background:#EFF0F3}
+.m-feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:14px;padding:12px 28px}
+.m-hello{margin:auto;font-size:26px;font-weight:600;color:#2A2C32}
+.m-u{align-self:flex-end;max-width:76%;background:#F0F1F4;border-radius:18px 18px 6px 18px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;font-size:14px;animation:mIn .4s cubic-bezier(.2,0,0,1) both}
+.m-u img{width:70px;border-radius:8px}
+.m-a{align-self:flex-start;max-width:80%;font-size:14px;color:#2A2C32;display:flex;align-items:center;gap:8px;animation:mIn .4s cubic-bezier(.2,0,0,1) both}
+.m-a .d{display:inline-flex;gap:4px}
+.m-a .d i{width:6px;height:6px;border-radius:50%;background:#6B70FF;animation:pulse 1.1s ease-in-out infinite}
+.m-a .d i:nth-child(2){animation-delay:.15s}.m-a .d i:nth-child(3){animation-delay:.3s}
+@keyframes mIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.m-comp{position:relative;flex:none;margin:0 24px 20px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px #DFE1E6,0 4px 14px -8px rgba(0,0,0,.15);padding:12px 14px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .25s}
+.m-comp.drop{box-shadow:inset 0 0 0 2px #6B70FF}
+.m-att{display:none;align-items:center;gap:8px;font-size:12.5px;color:#5A5E66}
+.m-att img{width:40px;height:40px;object-fit:cover;border-radius:8px}
+.has-att .m-att{display:flex;animation:mIn .35s both}
+.m-input{position:relative;min-height:22px;font-size:15px;color:#1A1B1F;max-height:66px;overflow:hidden}
+.m-ph{color:#A3A7AF}
+.m-input.filled .m-ph{display:none}
+.m-text.flash{background:#E3E6FF;border-radius:3px}
+.m-kbd{position:absolute;right:0;top:-2px;font-size:12px;font-weight:700;background:#1A1B1F;color:#fff;padding:2px 7px;border-radius:6px;opacity:0;transition:opacity .2s}
+.m-kbd.on{opacity:1}
+.m-tools{display:flex;align-items:center;gap:8px}
+.m-plus{width:30px;height:30px;border-radius:50%;border:0;background:#F0F1F4;font-size:18px;color:#3A3D44}
+.m-canvas-chip{display:none;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px;background:#E8EAFF;color:#3B3FD9}
+.m-canvas-chip.on{display:inline-block;animation:mIn .3s both}
+.m-think{border:0;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:#F0F1F4;color:#5A5E66;transition:background .25s,color .25s}
+.m-think.on{background:#1A1B1F;color:#fff}
+.m-sp{flex:1}
+.m-send{width:32px;height:32px;border-radius:50%;border:0;background:#C9CCD3;color:#fff;font-weight:700;font-size:15px;transition:background .2s}
+.m-input.filled ~ .m-tools .m-send,.m-send.ready{background:#1A1B1F}
+.m-plusmenu{display:none;position:absolute;left:12px;bottom:56px;background:#fff;border-radius:12px;box-shadow:0 0 0 1px #E1E3E8,0 10px 24px -10px rgba(0,0,0,.25);padding:6px;min-width:190px}
+.m-plusmenu.on{display:block;animation:mIn .25s both}
+.m-pm{padding:9px 12px;border-radius:8px;font-size:14px}
+.m-pm.hover{background:#F0F1F4}
+.m-menu{display:none;position:absolute;left:18px;top:48px;z-index:3;background:#fff;border-radius:14px;box-shadow:0 0 0 1px #E1E3E8,0 14px 30px -12px rgba(0,0,0,.3);padding:6px;width:280px}
+.m-menu.on{display:block;animation:mIn .25s both}
+.m-mi{padding:10px 12px;border-radius:9px;display:flex;flex-direction:column;gap:2px}
+.m-mi b{font-size:14.5px}
+.m-mi span{font-size:12.5px;color:#7A7E87}
+.m-mi.hover{background:#F0F1F4}
+.m-prev{width:0;flex:none;overflow:hidden;border-left:1px solid #ECEDF0;background:#FAFAFB;display:flex;flex-direction:column;transition:width .7s cubic-bezier(.2,0,0,1)}
+.prev-open .m-prev{width:330px}
+.m-prev-head{height:46px;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid #ECEDF0;font-size:13px;font-weight:600;color:#5A5E66;white-space:nowrap}
+.m-ver{display:inline-flex;align-items:center;gap:4px;margin-left:auto;font-variant-numeric:tabular-nums}
+.m-ver button{border:0;background:#EFF0F3;width:22px;height:22px;border-radius:6px;font-size:13px;color:#3A3D44}
+.m-pub{border:0;background:#1A1B1F;color:#fff;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px}
+.m-prev-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+.m-prev.flash .m-prev-body{animation:flash .7s ease}
+@keyframes flash{0%{opacity:1}30%{opacity:.15}100%{opacity:1}}
+.m-desk{display:none;position:absolute;inset:0;background:linear-gradient(135deg,#D9DCE6,#C7CBD8);border-radius:12px}
+.m-desk.on{display:block;animation:fade .3s both}
+.m-desk.on ~ .m-app{opacity:1}
+.m-file{position:absolute;left:70px;top:80px;width:110px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:#1A1B1F;text-align:center}
+.m-file img{width:86px;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.m-ghost{position:absolute;z-index:6;width:86px;border-radius:10px;box-shadow:0 12px 26px rgba(0,0,0,.3);pointer-events:none;opacity:.92}
+.m-compare{display:none;position:absolute;inset:44px 0 0;background:#fff;align-items:center;justify-content:center;gap:56px}
+.m-compare.on{display:flex;animation:fade .3s both}
+.mc-col{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#5A5E66}
+.mc-img{position:relative;width:300px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px #E3E5E9}
+.mc-img img{display:block;width:100%}
+.mk{position:absolute;width:26px;height:26px;border-radius:50%;background:#E5335F;color:#fff;font-style:normal;font-weight:700;font-size:13px;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(229,51,95,.25);opacity:0;transform:scale(.4);transition:opacity .3s,transform .45s cubic-bezier(.34,1.56,.64,1)}
+.mk.on{opacity:1;transform:none}
+.mk1{left:36%;top:6%}.mk2{left:62%;top:34%}.mk3{left:30%;top:48%}
+.m-modal{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;width:440px;background:#fff;border-radius:16px;box-shadow:0 0 0 1px #E1E3E8,0 30px 60px -20px rgba(0,0,0,.35);padding:22px;flex-direction:column;gap:14px;font-size:16px}
+.m-modal.on{display:flex;animation:mIn .3s both}
+.m-link{display:flex;align-items:center;gap:8px;border-radius:10px;background:#F3F4F6;padding:8px 8px 8px 12px;font-size:13px;color:#3A3D44}
+.m-link span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-copy{border:0;background:#1A1B1F;color:#fff;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px}
+.m-toast{display:none;position:absolute;left:50%;bottom:110px;transform:translateX(-50%);z-index:6;background:#1A1B1F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:999px}
+.m-toast.on{display:block;animation:mIn .3s both}
+.m-mobile{display:none;position:absolute;inset:0;z-index:7;background:linear-gradient(135deg,#D9DCE6,#C7CBD8);align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.m-mobile.on{display:flex;animation:fade .4s both}
+.mm-bar{font-size:12.5px;font-weight:600;color:#3A3D44;background:#fff;padding:6px 14px;border-radius:999px}
+.cursor{position:absolute;left:0;top:0;z-index:20;width:26px;height:26px;pointer-events:none;will-change:transform}
+.cursor svg{width:26px;height:26px;fill:#111;stroke:#fff;stroke-width:1.6;stroke-linejoin:round;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));transition:transform .12s}
+.cursor.press svg{transform:scale(.82)}
+.ripple{position:absolute;z-index:19;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:2px solid #6B70FF;pointer-events:none;animation:rip .5s ease-out forwards}
+@keyframes rip{from{opacity:.9;transform:scale(.3)}to{opacity:0;transform:scale(1.4)}}
+.cap{min-height:3.1em;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--f-body);font-size:clamp(16px,2.2vw,19px);font-weight:600;line-height:1.35;color:var(--ink);padding:2px 8px;opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.cap.on{opacity:1;transform:none}
+@media (max-width:560px){.vx-time{min-width:64px}}
+
+/* connectors dialog + Figma window inside the explainer */
+.m-conn{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;width:440px;background:#fff;border-radius:16px;box-shadow:0 0 0 1px #E1E3E8,0 30px 60px -20px rgba(0,0,0,.35);padding:22px;flex-direction:column;gap:12px;font-size:15px}
+.m-conn.on{display:flex;animation:mIn .3s both}
+.m-conn b{font-size:18px}
+.m-conn p{font-size:13.5px;color:#6B707A}
+.mc-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;box-shadow:inset 0 0 0 1px #E6E8EC}
+.mc-dim{opacity:.55}
+.mc-ic{width:30px;height:30px;border-radius:8px;background:#1A1B1F;color:#fff;font-weight:700;display:grid;place-items:center;font-size:14px}
+.mc-name{flex:1;font-weight:600}
+.mc-btn{border:0;background:#1A1B1F;color:#fff;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;transition:background .3s}
+.mc-btn.ghost{background:#EFF0F3;color:#3A3D44}
+.mc-btn.done{background:#1F8F5A}
+.m-figma{display:none;position:absolute;inset:44px 0 0;z-index:4;background:#fff;flex-direction:column}
+.m-figma.on{display:flex;animation:fade .3s both}
+.fg-top{height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#2C2C2C;color:#fff;font-size:13px;font-weight:600}
+.fg-zoom{font-weight:500;color:#BDBDBD}
+.fg-body{flex:1;min-height:0;display:flex}
+.fg-layers,.fg-insp{width:190px;flex:none;padding:14px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px;background:#fff}
+.fg-layers{border-right:1px solid #E6E6E6}
+.fg-insp{border-left:1px solid #E6E6E6;color:#4A4A4A}
+.fg-layers b,.fg-insp b{font-size:12px;color:#111;margin:6px 0 2px}
+.fg-l{padding:5px 8px;border-radius:6px;color:#333;white-space:nowrap}
+.fg-l.sub{padding-left:22px;color:#666}
+.fg-l.sel{background:#E5F4FF;color:#0D63B8;font-weight:600}
+.fg-canvas{flex:1;position:relative;background:#E8E8E8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.fg-name{font-size:11px;color:#777;align-self:center}
+.fg-art{width:220px;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+.fg-art img{display:block;width:100%}
+.fg-art.sel{box-shadow:0 0 0 2px #0D99FF}
+.fg-ctx{display:none;position:absolute;left:calc(50% + 40px);top:46%;z-index:2;background:#1E1E1E;color:#fff;border-radius:10px;padding:6px;min-width:200px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.fg-ctx.on{display:block;animation:mIn .2s both}
+.fg-ctx div{padding:7px 10px;border-radius:6px}
+.fg-ctx div.hover{background:#0D99FF}
+.m-scan{flex-direction:column;align-items:flex-start;gap:8px}
+.m-scan .sc-h{display:flex;align-items:center;gap:8px;font-weight:600}
+.m-scan ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.m-scan li{position:relative;padding:6px 10px 6px 30px;border-radius:9px;background:#F0F1F4;font-size:13px;animation:mIn .3s both}
+.m-scan li::before{content:"✓";position:absolute;left:9px;top:6px;width:14px;height:14px;border-radius:50%;background:#1F8F5A;color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center}
+
+/* ---- washing machine prototype: its own fixed dark world, drawn at 390 wide and scaled ---- */
+.device{border-radius:13%/6%;background:#1A1A1C;box-shadow:0 0 0 1px var(--line),0 30px 60px -30px rgba(0,0,0,.5);flex:none;position:relative}
+.device-in{position:absolute;overflow:hidden;background:#000}
+.ws{position:absolute;left:0;top:0;width:390px;height:873px;transform-origin:0 0;background:#000;color:#fff;font-family:'Google Sans','Google Sans Flex',system-ui,sans-serif;overflow:hidden}
+.ws.v1{font-family:'Roboto Flex','Roboto',system-ui,sans-serif}
+.ws button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+.ws-status{height:54px;display:flex;align-items:center;justify-content:space-between;padding:6px 34px 0 46px;font-size:16px;font-weight:500}
+.ws-island{position:absolute;left:50%;top:12px;width:120px;height:34px;margin-left:-60px;border-radius:20px;background:#111}
+.ws-sig{display:flex;gap:6px;align-items:center}
+.ws-sig svg{height:12px;fill:#fff}
+.ws-content{position:absolute;inset:54px 0 0 0;transition:transform .5s cubic-bezier(.2,0,0,1),opacity .4s}
+.ws.closed .ws-content{transform:translateY(100%);opacity:0}
+.ws-top{display:flex;align-items:center;gap:14px;padding:14px 22px 0 22px;height:64px}
+.ws-x{width:32px;height:32px;border:0;background:none;color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.ws svg.i{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ws-x svg{width:20px;height:20px}
+.ws-title{font-size:21px;font-weight:400;flex:1}
+.ws-ib{width:38px;height:38px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;color:#0E2410;transition:transform .12s ease-out,background .3s}
+.ws-ib svg{width:18px;height:18px}
+.ws-power{background:#8BD88B}
+.ws.off .ws-power{background:#5A5A5E;color:#1C1C1E}
+.ws-more{background:#E8E8EA;color:#1C1C1E}
+.ws-ib:active,.ws-big:active{transform:scale(.9)}
+.ws-ring{position:relative;width:330px;height:330px;margin:44px auto 0}
+.ws-ring svg.ring{position:absolute;inset:0;width:100%;height:100%}
+.ws-center{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ws.v1 .ws-center{padding-right:46px;padding-top:30px}
+.ws-time{font-size:42px;font-weight:400;letter-spacing:-.01em;line-height:1.1}
+.ws-sm{font-size:14px;color:#8E8E93;margin-top:4px}
+.ws-sec-wrap{margin-top:26px;max-height:72px;overflow:hidden;display:flex;flex-direction:column;align-items:center;transition:opacity .3s,max-height .6s cubic-bezier(.2,0,0,1),margin-top .6s cubic-bezier(.2,0,0,1)}
+.ws-sec-wrap.gone{opacity:0;max-height:0;margin-top:0}
+.ws.v1 .ws-sec-wrap.gone{display:none}
+.ws-sec{font-size:19px}
+.ws-info{text-align:center;margin-top:66px;display:flex;flex-direction:column;align-items:center}
+.ws-mode{font-size:22px}
+.ws-state{font-size:15px;margin-top:3px;transition:opacity .25s}
+.ws-temp{font-size:14px;color:#8E8E93;margin-top:28px;transition:opacity .25s}
+.ws-btns{position:absolute;left:0;right:0;bottom:50px;display:flex;justify-content:center;gap:12px}
+.ws-big{width:70px;height:70px;border-radius:50%;border:0;background:#C9E3FB;color:#0B1D2E;display:grid;place-items:center;cursor:pointer;transition:transform .12s ease-out}
+.ws-big svg{width:22px;height:22px;stroke-width:2.2}
+.ws-home{position:absolute;left:50%;bottom:10px;width:140px;height:5px;margin-left:-70px;border-radius:3px;background:#fff;z-index:9}
+.ws-in{animation:wsIn .8s cubic-bezier(.2,0,0,1) both}
+@keyframes wsIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ws-dim{position:absolute;inset:54px 0 0 0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s}
+.ws.off .ws-dim{opacity:.82}
+.ws.off .ws-top{position:relative;z-index:3}
+.ws-menu{position:absolute;right:22px;top:118px;z-index:5;background:#2C2C2E;border-radius:16px;padding:6px;min-width:170px;display:flex;flex-direction:column;transform-origin:top right;transition:opacity .18s,transform .22s cubic-bezier(.2,0,0,1)}
+.ws-menu.hide{opacity:0;transform:scale(.92);pointer-events:none}
+.ws-menu button{border:0;background:none;color:#fff;text-align:left;font-size:16px;padding:12px 14px;border-radius:10px;cursor:pointer}
+.ws-menu button:hover{background:#3A3A3C}
+.ws-sheet{position:absolute;left:10px;right:10px;bottom:10px;z-index:6;background:#1C1C1E;border-radius:30px;padding:26px 22px 22px;display:flex;flex-direction:column;gap:20px;transition:transform .35s cubic-bezier(.2,0,0,1)}
+.ws-sheet.hide{transform:translateY(120%)}
+.ws-sheet b{font-size:21px;font-weight:500}
+.ws-sheet p{font-size:15px;color:#8E8E93;margin-top:-12px}
+.ws-sheet-btns{display:flex;gap:10px}
+.ws-sheet-btns button{flex:1;height:52px;border-radius:26px;border:0;font-size:16px;font-weight:500;cursor:pointer}
+.ws-cancel{background:#2C2C2E;color:#fff}
+.ws-stopok{background:#C9E3FB;color:#0B1D2E}
+.ws-scrim{position:absolute;inset:0;z-index:4;background:rgba(0,0,0,.5);transition:opacity .3s}
+.ws-scrim.hide{opacity:0;pointer-events:none}
+.ws-closed{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:18px;color:#8E8E93;opacity:0;pointer-events:none;transition:opacity .4s .15s}
+.ws.closed .ws-closed{opacity:1;pointer-events:auto}
+.ws-closed button{border:0;background:#C9E3FB;color:#0B1D2E;font-size:16px;font-weight:500;padding:14px 22px;border-radius:26px;cursor:pointer}
+.ws-pin{position:absolute;z-index:8;width:46px;height:46px;border-radius:50%;background:#E5335F;color:#fff;font:700 24px/46px system-ui,sans-serif;text-align:center;box-shadow:0 0 0 6px rgba(229,51,95,.28);pointer-events:none}
+@media (prefers-reduced-motion: reduce){.ws-in{animation:none}}
+
+/* source fork: picture or Figma */
+.src-tabs{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--bg-2);align-self:flex-start;flex-wrap:wrap}
+.src-tabs button{border:0;background:none;padding:9px 18px;border-radius:999px;font-weight:600;font-size:15px;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.src-tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.src-badge{font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--ok);color:#fff}
+.src-panel{display:flex;flex-direction:column;gap:26px;animation:rise .4s cubic-bezier(.2,0,0,1)}
+.src-lead{font-size:21px;line-height:1.55;color:var(--ink)}
+.mcp-box{display:flex;flex-direction:column;gap:8px;padding:20px 22px;border-radius:16px;background:var(--bg-2)}
+.mcp-box b{font-family:var(--f-text);font-size:19px}
+.mcp-box p{font-size:17px;line-height:1.6;color:var(--ink-2)}
+.vs{display:flex;flex-direction:column;border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);overflow:hidden;font-size:16px}
+.vs-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr);gap:12px;padding:12px 18px;align-items:baseline}
+.vs-row + .vs-row{border-top:1px solid var(--line)}
+.vs-head{background:var(--bg-2);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.vs-row span:first-child{color:var(--ink-3);font-size:14px}
+.vs-row span{color:var(--ink-2)}
+.vs-row b{color:var(--ok);font-weight:600}
+.vs-head span{color:var(--ink-3)!important;font-size:12px!important}
+@media (max-width:480px){.vs-row{padding:10px 14px;gap:8px;font-size:15px}}
+
+/* ===== prompt anatomy: scroll-driven highlight of each part and its effect ===== */
+.pa{position:relative;width:100vw;margin-left:calc(50% - 50vw);background:var(--bg-2);padding:88px 0 64px;margin-block:12px}
+.pa-in{max-width:1120px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.pa-head{max-width:680px;display:flex;flex-direction:column;gap:14px;padding-bottom:12px}
+.pa-title{font-size:clamp(30px,4.6vw,44px);line-height:1.08;letter-spacing:-.025em}
+.pa-lead{font-size:20px;line-height:1.5;color:var(--ink-2)}
+.pa-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,500px);gap:64px;align-items:start}
+.pa-scene{min-height:78vh;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-block:6vh}
+.pa-n{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ink-3)}
+.pa-big{font-family:var(--f-text);font-size:clamp(26px,3vw,36px);line-height:1.15;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.pa-small{font-size:clamp(17px,1.5vw,20px);line-height:1.6;color:var(--ink-2);max-width:500px}
+.pa-scene > *{opacity:.35;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,0,0,1),transform .7s cubic-bezier(.2,0,0,1)}
+.pa-scene.on > *,.pa-scene.seen > *{opacity:1;transform:none}
+.pa-stick{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);height:calc(100vh - 100px);max-height:680px}
+.pa-panel{height:100%;display:grid;grid-template-rows:minmax(0,1fr) minmax(0,1.15fr);gap:12px}
+.pa-box{position:relative;background:var(--bg);border-radius:18px;box-shadow:0 0 0 1px var(--line);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.pa-label{flex:none;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:12px 16px 4px}
+.pa-prompt{flex:1;min-height:0;overflow:auto;margin:0;padding:6px 16px 16px;font-family:var(--f-mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap;color:var(--ink-3);scrollbar-width:none}
+.pa-prompt::-webkit-scrollbar{display:none}
+.pa-prompt span{border-radius:4px;transition:background .4s,color .4s,box-shadow .4s}
+.pa-prompt span.on{color:var(--ink);background:color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+.pa[data-p="9"] .pa-prompt span{color:var(--ink-2)}
+.pa-quote{display:none}
+.pa-viz{position:relative;flex:1;min-height:0}
+.v{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 16px 16px;opacity:0;transform:translateY(12px) scale(.98);transition:opacity .45s cubic-bezier(.2,0,0,1),transform .45s cubic-bezier(.2,0,0,1);pointer-events:none}
+.pa-viz[data-p="1"] .v1,.pa-viz[data-p="2"] .v2,.pa-viz[data-p="3"] .v3,.pa-viz[data-p="4"] .v4,.pa-viz[data-p="5"] .v5,.pa-viz[data-p="6"] .v6,.pa-viz[data-p="7"] .v7,.pa-viz[data-p="8"] .v8,.pa-viz[data-p="9"] .v9{opacity:1;transform:none}
+.ph{--w:118px;width:var(--w);height:calc(var(--w)*2.087);flex:none;position:relative;background:#000 url(ref.jpg) no-repeat;background-size:calc(var(--w)*2.585) auto;background-position:calc(var(--w)*-.794) calc(var(--w)*-.234);border-radius:calc(var(--w)*.16)}
+.v figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:8px}
+.v figcaption{font-size:12.5px;color:var(--ink-2);text-align:center;line-height:1.35;display:flex;flex-direction:column}
+.v figcaption b{color:var(--ink);font-size:13px}
+/* 1 */
+.v1{flex-direction:column;gap:10px}
+.v1 span{font-size:16px;font-weight:600;padding:10px 18px;border-radius:999px;background:var(--accent-soft);color:var(--accent);opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.pa-viz[data-p="1"] .v1 span{opacity:1;transform:none}
+.pa-viz[data-p="1"] .v1 span:nth-child(2){transition-delay:.15s}.pa-viz[data-p="1"] .v1 span:nth-child(3){transition-delay:.3s}
+/* 2 */
+.v2 .ph{--w:112px}
+.lb{position:absolute;font-style:normal;font-size:12px;font-weight:600;background:var(--ink);color:var(--bg);padding:5px 9px;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity .4s}
+.pa-viz[data-p="2"] .lb{opacity:1}
+.lb1{left:calc(50% + 40px);top:30%}.lb2{right:calc(50% + 40px);top:62%}.lb3{left:calc(50% + 40px);top:82%}
+.pa-viz[data-p="2"] .lb2{transition-delay:.15s}.pa-viz[data-p="2"] .lb3{transition-delay:.3s}
+/* 3 */
+.v3 .ph{--w:96px}
+.v3 .bad .ph{filter:hue-rotate(150deg) saturate(1.6) brightness(1.15);border-radius:30px;box-shadow:0 14px 28px -10px rgba(120,60,255,.6)}
+.v3 .bad figcaption{color:var(--pin)}
+/* 4 */
+.v4{flex-direction:column;gap:8px}
+.vf{width:88%;max-width:340px;aspect-ratio:16/10;border-radius:12px;background:#fff;box-shadow:0 0 0 1px var(--line);overflow:hidden;display:flex;flex-direction:column}
+.vf-bar{height:16px;flex:none;background:#ECEDF0}
+.vf-page{flex:1;display:flex;align-items:center;justify-content:center;background:#E7E8EC;overflow:hidden}
+.vf-page .ph{--w:58px;transform-origin:center}
+.pa-viz[data-p="4"].anim .vf-page .ph{animation:squeeze 1.6s cubic-bezier(.2,0,0,1) .3s both}
+@keyframes squeeze{from{width:100%;height:100%;border-radius:0;background-size:220% auto;background-position:50% 30%}to{width:58px;height:121px;border-radius:9px;background-size:150px auto;background-position:-46px -13.6px}}
+.vf-dim{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+/* 5 */
+.file{font-family:var(--f-mono);font-size:13px;padding:14px 16px;border-radius:10px;background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--line)}
+.arr{font-size:22px;color:var(--ink-3)}
+.mini-win{border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:#E7E8EC;display:flex;flex-direction:column;align-items:center;padding-bottom:10px;gap:8px}
+.mw-bar{align-self:stretch;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--bg);padding:5px 8px}
+.mini-win .ph{--w:66px}
+/* 6 */
+.v6{flex-direction:column;gap:14px;align-items:stretch;padding-inline:28px}
+.ty span{white-space:nowrap}
+.ty{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:12px;background:#0B0C0F;color:#fff}
+.ty em{font-style:normal;font-size:12px;color:#9AA0AA;text-align:right}
+.ty-a{font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;letter-spacing:.02em;color:#E8E8E8}
+.ty-b{font-family:'Google Sans','Google Sans Flex',sans-serif;font-size:30px;font-weight:400}
+.sw{display:flex;gap:8px;justify-content:center}
+.sw i{width:30px;height:30px;border-radius:50%;box-shadow:0 0 0 1px var(--line)}
+/* 7 */
+.v7 .ph{--w:116px}
+.zn{position:absolute;left:50%;width:132px;margin-left:-66px;font-style:normal;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:flex-start;justify-content:flex-end;padding:4px 6px;border-radius:6px;opacity:0;transition:opacity .4s}
+.z1{top:calc(50% - 121px);height:44px;background:rgba(91,214,159,.45)}
+.z2{top:calc(50% - 74px);height:110px;background:rgba(154,166,255,.45)}
+.z3{top:calc(50% + 62px);height:56px;background:rgba(255,179,92,.5)}
+.pa-viz[data-p="7"] .zn{opacity:1}
+.pa-viz[data-p="7"] .z2{transition-delay:.2s}.pa-viz[data-p="7"] .z3{transition-delay:.4s}
+/* 8 */
+.v8{flex-direction:column;gap:10px}
+.ly{width:min(300px,86%);display:flex;justify-content:space-between;padding:14px 18px;border-radius:14px;background:var(--bg-2);color:var(--ink-3);font-weight:600;font-size:16px}
+.ly b{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.ly.on{background:var(--ink);color:var(--bg)}
+/* 9 */
+.v9 .ph{--w:78px}
+.v9 .fast .ph::after{content:"";position:absolute;left:10%;top:20.7%;width:80%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,transparent 72%,#000 72.5%,#000 84%,#E8E8EA 84.5%,#E8E8EA 89%,#000 89.5%,#000 99%,transparent 100%)}
+.v9 .other .ph::before{content:"My App";position:absolute;left:0;right:0;top:0;height:18px;background:#4F46E5;color:#fff;font-size:8px;font-weight:700;display:grid;place-items:center;border-radius:calc(var(--w)*.16) calc(var(--w)*.16) 0 0}
+@media (max-width:899px){
+  .pa{padding:64px 0 32px}
+  .pa-grid{grid-template-columns:minmax(0,1fr);gap:0}
+  .pa-stick{order:-1;top:calc(env(safe-area-inset-top,0px) + 54px);height:auto;max-height:none;z-index:2;background:var(--bg-2);padding:8px 0 12px}
+  .pa-panel{display:flex;flex-direction:column;gap:8px}
+  .pa-box:first-child .pa-prompt{display:none}
+  .pa-quote{display:block;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;color:var(--ink);padding:2px 16px 14px;min-height:3.2em}
+  .pa-viz-box{height:300px}
+  .v6{padding-inline:14px;gap:10px}
+  .ty{padding:8px 12px}
+  .ty-a{font-size:20px}.ty-b{font-size:23px}
+  .ty em{font-size:11px}
+  .v3 .ph{--w:84px}.v9 .ph{--w:64px}.v9{gap:10px}
+  .pa-scene{min-height:62vh;justify-content:flex-start;padding-block:5vh}
+}
+@media (prefers-reduced-motion: reduce){
+  .pa-scene > *{opacity:1;transform:none}
+  .v,.v1 span,.lb,.zn{transition:none}
+  .pa-viz[data-p="4"].anim .vf-page .ph{animation:none}
+}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="tb-title" href="#top">Первый прототип с ИИ</a>
+    <span class="tb-count" id="tbCount">0 из 10</span>
+  </div>
+  <div class="tb-bar"><i id="tbBar"></i></div>
+</header>
+<main class="article">
+  <header class="hero" id="top">
+    <span class="kicker">Гайд для продуктовых дизайнеров</span>
+    <h1>Первый прототип с ИИ</h1>
+    <p class="subtitle">Одна картинка, десять коротких шагов — и у вас живой экран, который можно нажимать. Код пишет модель, вы ставите задачу и проверяете.</p>
+    <div class="byline"><span>10 шагов</span><span>≈ 1 час</span><span>Без установки программ</span></div>
+  </header>
+  <figure class="hero-fig" id="heroFig">
+    <div class="wm-host" data-wm="5" data-w="270" data-bare="1"></div>
+    <figcaption>Вот что получится. Нажмите на кнопки внизу экрана.</figcaption>
+  </figure>
+  <div class="start-row">
+    <p class="start-hint">Начнём с первого шага. Остальные откроются по ходу.</p>
+    <button class="link-btn" type="button" id="openAll">Открыть все шаги сразу</button>
+  </div>
+  <div class="sep" aria-hidden="true">···</div>
+
+  <section class="step gate" data-step="1" data-gate="1" id="step-1">
+    <header class="step-h">
+      <span class="step-no">Шаг 1 из 10 · ≈ 2 мин</span>
+      <h2>Откройте <span data-pv="name">Claude</span></h2>
+      
+    </header>
+    <p class="locked-note">Откроется после шага 0</p>
+    <div class="step-body">
+      <div class="vx" data-vx="1"></div>
+      <div class="pick">
+        <span class="pick-label">Где будете работать</span>
+        <div class="pv-grid" id="pvGrid" role="group" aria-label="Сервис"></div>
+        <p class="pv-note" id="pvNote"></p>
+      </div>
+      <ul class="todo" data-pv-list="open"></ul>
+      <p class="why" data-pv="plan"></p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="1">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="2" data-gate="2" id="step-2">
+    <header class="step-h">
+      <span class="step-no">Шаг 2 из 10 · ≈ 3 мин</span>
+      <h2>Выберите модель</h2>
+      
+    </header>
+    <p class="locked-note">Откроется после шага 1</p>
+    <div class="step-body">
+      <div class="vx" data-vx="2"></div>
+      
+      <ul class="todo">
+        <li>Откройте список моделей. Он над полем ввода или рядом с ним.</li>
+        <li>Для сборки прототипа выберите сильную модель и включите размышление.</li>
+        <li>Для мелких правок переключитесь на быструю: ответ придёт быстрее, а лимит сообщений расходуется медленнее.</li>
+      </ul>
+      <div class="models">
+        <div class="model-row"><b>Сильная</b><span class="model-name" data-pvm="strong"></span><span class="model-use">Вёрстка по картинке, анимации, логика, сверка, поиск ошибок</span></div>
+        <div class="model-row"><b>Средняя</b><span class="model-name" data-pvm="balanced"></span><span class="model-use">Правки в нескольких местах экрана</span></div>
+        <div class="model-row"><b>Быстрая</b><span class="model-name" data-pvm="fast"></span><span class="model-use">Вопросы, тексты, правки в одну строку</span></div>
+      </div>
+      <div class="think">
+        <b>Что такое размышление</b>
+        <p>В этом режиме модель сначала разбирает задачу, составляет план и проверяет его, а потом отвечает. Ответ приходит дольше и тратит больше лимита. Зато в сложных задачах модель реже ошибается. В сервисах режим называется reasoning, thinking или extended thinking.</p>
+        <p><b>Как включить:</b> <span data-pvm="think"></span></p>
+        <p><b>Когда включать:</b> задача из нескольких частей; нужна точность до пикселя; движение и логика; модель второй раз повторяет ту же ошибку. Для мелких правок выключайте.</p>
+      </div>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Если переключателя нет</span><button class="copy" type="button">Скопировать</button></div><pre>Прежде чем писать код, подумай: разбери задачу по шагам, составь короткий план и проверь, ничего ли не упущено. Код пиши только после плана.</pre></div>
+      <p class="why"><b>Почему так:</b> сильная модель с размышлением отвечает дольше, но реже пропускает детали. Мелкую правку быстрая модель сделает за секунды. На шагах 4–9 есть подсказка, какую модель взять. Сервисы переименовывают модели, поэтому смотрите на подпись рядом с названием: «самая умная», «быстрая».</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="2">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="3" data-gate="3" id="step-3">
+    <header class="step-h">
+      <span class="step-no">Шаг 3 из 10 · ≈ 1 мин</span>
+      <h2>Покажите макет</h2>
+      
+    </header>
+    <p class="locked-note">Откроется после шага 2</p>
+    <div class="step-body">
+      <div class="src-tabs" role="tablist" aria-label="Как показать макет">
+        <button type="button" role="tab" data-src="image" aria-selected="true">Картинка</button>
+        <button type="button" role="tab" data-src="figma" aria-selected="false">Ссылка на Figma<span class="src-badge">точнее</span></button>
+      </div>
+      <div class="src-panel" data-src-panel="image">
+      <div class="vx" data-vx="3"></div>
+      
+      <div class="ref">
+        <img src="ref.jpg" alt="Экран управления стиральной машиной: волнистое кольцо прогресса, время 2h 22m, две голубые кнопки внизу" width="200" height="200">
+        <p>Сохраните эту картинку на компьютер: правый клик → «Сохранить изображение».</p>
+      </div>
+      <ul class="todo">
+        <li>Перетащите картинку в поле сообщения.</li>
+        <li>Пока ничего не отправляйте.</li>
+      </ul>
+      <p class="why"><b>Почему так:</b> модель понимает картинки. С картинкой и описанием она ошибается реже, чем с одним описанием.</p>
+      </div>
+      <div class="src-panel" data-src-panel="figma" hidden>
+        <div class="vx" data-vx="3f"></div>
+        <p class="src-lead">Если макет уже в Figma, дайте модели доступ к файлу. Она прочитает точные размеры, цвета и шрифты, а не будет угадывать их по картинке.</p>
+        <div class="mcp-box"><b>Что такое MCP</b><p>Переходник между моделью и другим сервисом. Через него модель не разглядывает пиксели, а читает данные файла: «кнопка 70 × 70, цвет #C9E3FB, отступ 12».</p></div>
+        <div class="vs" role="table" aria-label="Картинка или Figma">
+          <div class="vs-row vs-head" role="row"><span role="columnheader"></span><span role="columnheader">Картинка</span><span role="columnheader">Figma</span></div>
+          <div class="vs-row" role="row"><span role="rowheader">Размеры</span><span>на глаз</span><b>точные числа</b></div>
+          <div class="vs-row" role="row"><span role="rowheader">Шрифт</span><span>похожий</span><b>точное название</b></div>
+          <div class="vs-row" role="row"><span role="rowheader">Цвета</span><span>примерно</span><b>коды из файла</b></div>
+          <div class="vs-row" role="row"><span role="rowheader">Слои</span><span>не видит</span><b>видит структуру</b></div>
+          <div class="vs-row" role="row"><span role="rowheader">Подготовка</span><span>ничего</span><b>подключить один раз</b></div>
+        </div>
+        <ul class="todo">
+          <li data-fig="how"></li>
+          <li>В Figma выделите фрейм с экраном. Правый клик → Copy link to selection.</li>
+          <li>Вставьте ссылку в поле сообщения. Картинку можно приложить тоже: модель увидит общий вид.</li>
+          <li>Пока ничего не отправляйте.</li>
+        </ul>
+        <p class="why"><b>Почему так:</b> по картинке модель угадывает размеры на глаз и может взять похожий, но не тот шрифт. Из Figma она берёт точные числа, названия шрифтов и структуру слоёв.</p>
+      </div>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="3">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="4" data-gate="4" id="step-4">
+    <header class="step-h">
+      <span class="step-no">Шаг 4 из 10 · ≈ 5 мин</span>
+      <h2>Опишите экран</h2>
+      <div class="mode" data-mode="strong"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 3</p>
+    <div class="step-body">
+      <div class="vx" data-vx="4"></div>
+      <ul class="todo">
+        <li>Скопируйте текст ниже.</li>
+        <li>Вставьте его рядом с картинкой или ссылкой на Figma и отправьте.</li>
+        <li data-pv="preview"></li>
+      </ul>
+      <section class="pa" aria-label="Из чего состоит сообщение">
+        <div class="pa-in">
+          <header class="pa-head">
+            <span class="ch-kicker">Перед тем как копировать</span>
+            <h3 class="pa-title">Из чего состоит сообщение</h3>
+            <p class="pa-lead">Листайте: подсвечиваем часть сообщения и показываем, что из неё сделает модель.</p>
+          </header>
+          <div class="pa-grid">
+            <div class="pa-text">
+          <div class="pa-scene" data-n="1"><span class="pa-n">1 из 9</span><p class="pa-big">Задача: что сделать и по чему.</p><p class="pa-small">«Интерактивный прототип экрана мобильного приложения по картинке». Из этой фразы модель понимает три вещи: нужен живой код, а не описание; экран мобильный; образец — приложенная картинка.</p></div>
+          <div class="pa-scene" data-n="2"><span class="pa-n">2 из 9</span><p class="pa-big">Контекст: что это за продукт.</p><p class="pa-small">«Экран стиральной машины в приложении умного дома». Модель достраивает смысл: цифры в центре — время стирки, две кнопки — пауза и стоп. Это пригодится, когда дойдём до логики.</p></div>
+          <div class="pa-scene" data-n="3"><span class="pa-n">3 из 9</span><p class="pa-big">Строгость: насколько точно.</p><p class="pa-small">«Повтори картинку до пикселя». Без этой строки модель часто «улучшает» дизайн: меняет цвета, скругления, добавляет тени и градиенты.</p></div>
+          <div class="pa-scene" data-n="4"><span class="pa-n">4 из 9</span><p class="pa-big">Рамка: почему прототип в телефоне.</p><p class="pa-small">«Экран 390 × 844 по центру, вокруг серый фон». 390 × 844 — размер экрана iPhone в точках. Модель рисует экран этого размера посередине страницы, поэтому прототип выглядит как телефон. Без этой строки получится страница во всю ширину браузера.</p></div>
+          <div class="pa-scene" data-n="5"><span class="pa-n">5 из 9</span><p class="pa-big">Технология: в чём собрать.</p><p class="pa-small">«Один HTML-файл». Такой файл чат сразу показывает в предпросмотре, ничего не нужно собирать и устанавливать. Подробнее — в разборе после этого шага.</p></div>
+          <div class="pa-scene" data-n="6"><span class="pa-n">6 из 9</span><p class="pa-big">Точные значения: шрифт, размеры, цвета.</p><p class="pa-small">Пиксели и коды цветов модель повторяет буквально. «Крупный светлый текст» она поймёт по-своему, а «42 пикселя, белый» — нет. В треке Figma эти значения модель берёт из файла сама.</p></div>
+          <div class="pa-scene" data-n="7"><span class="pa-n">7 из 9</span><p class="pa-big">Структура: сверху вниз.</p><p class="pa-small">Описание по зонам — «Сверху», «В центре», «Внизу» — модель превращает в такие же блоки кода. Порядок в сообщении становится порядком на экране.</p></div>
+          <div class="pa-scene" data-n="8"><span class="pa-n">8 из 9</span><p class="pa-big">Граница: что пока не делать.</p><p class="pa-small">«Пока без движения и нажатий». Модель занимается одним слоем и реже ошибается. Движение и нажатия добавим следующими сообщениями.</p></div>
+          <div class="pa-scene" data-n="9"><span class="pa-n">9 из 9</span><p class="pa-big">Разные модели понимают это по-разному.</p><p class="pa-small">Сильная модель следует всем числам. Быстрая упрощает: может взять системный шрифт или нарисовать ровное кольцо вместо волны. Другие сервисы добавляют своё: шаблон страницы, заголовок, иконки. Поэтому результат всегда сверяют с картинкой — это шаг 5.</p></div>
+            </div>
+            <div class="pa-stick">
+              <div class="pa-panel">
+                <div class="pa-box"><span class="pa-label">Сообщение</span><pre class="pa-prompt"><span data-p="1">Сделай интерактивный прототип экрана мобильного приложения по картинке, которую я прикрепил.</span> <span data-p="2">Это экран управления стиральной машиной в приложении умного дома.</span> <span data-p="3">Повтори картинку до пикселя.</span>
+
+Общее:
+<span data-p="4">— экран телефона 390 × 844 пикселя по центру страницы, вокруг светло-серый фон;</span>
+<span data-p="6">— фон экрана чёрный, текст на английском;
+— шрифт Google Sans, «2h 22m» — 42 px, белый;
+— кнопки #C9E3FB по 70 px;</span>
+<span data-p="5">— один HTML-файл: разметка, стили и скрипт внутри.</span>
+
+<span data-p="7">Сверху: крестик, заголовок, две круглые кнопки.
+В центре: волнистое кольцо, время, подписи.
+Внизу: пауза и стоп.</span>
+
+<span data-p="8">Пока без движения и без реакции на нажатия, только внешний вид.</span></pre><p class="pa-quote"></p></div>
+                <div class="pa-box pa-viz-box"><span class="pa-label">Что сделает модель</span>
+                  <div class="pa-viz" data-p="1">
+                    <div class="v v1"><span>живой код</span><span>мобильный экран</span><span>по картинке</span></div>
+                    <div class="v v2"><div class="ph"></div><i class="lb lb1">время стирки</i><i class="lb lb2">режим</i><i class="lb lb3">пауза и стоп</i></div>
+                    <div class="v v3"><figure><div class="ph"></div><figcaption>с этой строкой</figcaption></figure><figure class="bad"><div class="ph"></div><figcaption>без неё</figcaption></figure></div>
+                    <div class="v v4"><div class="vf"><div class="vf-bar"></div><div class="vf-page"><div class="ph"></div></div></div><span class="vf-dim">390 × 844</span></div>
+                    <div class="v v5"><div class="file">index.html</div><span class="arr">→</span><div class="mini-win"><div class="mw-bar">Предпросмотр</div><div class="ph"></div></div></div>
+                    <div class="v v6"><div class="ty"><span class="ty-a">2h 22m</span><em>«крупный светлый текст»</em></div><div class="ty"><span class="ty-b">2h 22m</span><em>Google Sans · 42 px · #FFFFFF</em></div><div class="sw"><i style="background:#000"></i><i style="background:#8BD88B"></i><i style="background:#E8E8EA"></i><i style="background:#C9E3FB"></i></div></div>
+                    <div class="v v7"><div class="ph"></div><i class="zn z1">Сверху</i><i class="zn z2">В центре</i><i class="zn z3">Внизу</i></div>
+                    <div class="v v8"><div class="ly on">Внешний вид <b>сейчас</b></div><div class="ly">Движение <b>шаг 6</b></div><div class="ly">Нажатия <b>шаг 7</b></div></div>
+                    <div class="v v9"><figure><div class="ph"></div><figcaption><b>Сильная</b>следует числам</figcaption></figure><figure class="fast"><div class="ph"></div><figcaption><b>Быстрая</b>упрощает детали</figcaption></figure><figure class="other"><div class="ph"></div><figcaption><b>Другой сервис</b>добавляет своё</figcaption></figure></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="src-panel" data-src-panel="image"><div class="prompt"><div class="prompt-head"><span class="prompt-tag">Сообщение 1</span><button class="copy" type="button">Скопировать</button></div><pre><span data-pv="prefix"></span>Сделай интерактивный прототип экрана мобильного приложения по картинке, которую я прикрепил. Это экран управления стиральной машиной в приложении умного дома. Повтори картинку до пикселя.
+
+Общее:
+— экран телефона 390 × 844 пикселя по центру страницы, вокруг светло-серый фон;
+— фон экрана чисто чёрный;
+— весь текст на английском, как на картинке;
+— шрифт Google Sans из Google Fonts, обычный вес, не жирный;
+— один HTML-файл: разметка, стили и скрипт внутри, без других библиотек.
+
+Сверху:
+— слева крестик и заголовок «Washing machine», белый, 21 пиксель;
+— справа две круглые кнопки по 38 пикселей: светло-зелёная (#8BD88B) с тёмным значком питания и светло-серая (#E8E8EA) с тремя вертикальными точками.
+
+В центре — большое кольцо диаметром около 280 пикселей (по середине линии), его центр в 320 пикселях от верха экрана:
+— примерно 40% кольца — волнистая белая линия толщиной 14 пикселей со скруглёнными концами; на ней 6 одинаковых гребней, примерно через каждые 25°; она начинается сверху, у «12 часов», и идёт против часовой стрелки вниз по левой стороне до «7 часов»;
+— остальная часть кольца — ровная серая линия (#303034) толщиной 10 пикселей, светлее подложки;
+— середина волны проходит чуть ближе к центру, чем серая линия (на 10 пикселей), гребни заходят и внутрь, и наружу;
+— концы волны не выпрямляются, а продолжают изгиб: верхний конец загибается крючком, нижний уходит наружу;
+— между белой и серой частью небольшие зазоры;
+— под всем кольцом лежит подложка: заметное тёмно-серое кольцо (#151517) шириной около 36 пикселей, от внутреннего края волны до внешнего края серой линии; на ней лежат и волна, и серая линия;
+— внутри кольца фон чисто чёрный.
+
+Внутри кольца весь блок текста стоит строго по центру кольца, по горизонтали и по вертикали. Сверху вниз:
+— «2h 22m» — белый, 42 пикселя, обычный вес;
+— «remaining» — серый (#8E8E93), 14 пикселей;
+— отступ 28 пикселей;
+— «12 sec» — белый, 19 пикселей;
+— «To start drying» — серый (#8E8E93), 14 пикселей.
+
+Под кольцом по центру:
+— «Wash and dry» — белый, 22 пикселя;
+— «Currently washing» — белый, 15 пикселей;
+— отступ 28 пикселей;
+— «Temperature: 40°» — серый, 14 пикселей.
+
+Внизу, в 50 пикселях от края:
+— две круглые светло-голубые кнопки (#C9E3FB) по 70 пикселей, промежуток 12 пикселей;
+— на левой тёмный значок паузы, на правой тёмный квадрат «стоп».
+
+Пока без движения и без реакции на нажатия, только внешний вид.</pre></div></div>
+      <div class="src-panel" data-src-panel="figma" hidden><div class="prompt"><div class="prompt-head"><span class="prompt-tag">Сообщение 1 · Figma</span><button class="copy" type="button">Скопировать</button></div><pre>Сделай интерактивный прототип экрана по фрейму из Figma: [вставьте ссылку на фрейм].
+
+— Возьми из файла точные размеры, цвета, шрифты и отступы. Если чего-то нет в файле, спроси, а не придумывай.
+— Экран телефона по центру страницы, вокруг светло-серый фон.
+— Один HTML-файл: разметка, стили и скрипт внутри, шрифты из Google Fonts.
+— Пока без движения и без реакции на нажатия, только внешний вид.
+
+В конце перечисли, какие значения ты взял из Figma.</pre></div></div>
+      <p class="why"><b>Почему так:</b> чего нет в описании, модель додумывает сама. Размеры в пикселях, коды цветов и название шрифта не оставляют места для догадок.</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="4">Готово, дальше: как это работает<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="longread gate" data-gate="5" id="how">
+    <div class="lr-locked"><span class="ch-kicker">Разбор</span><b>Как модель собирает экран</b><span>Откроется после шага 4</span></div>
+    <div class="lr-in">
+      <header class="lr-head">
+        <span class="lr-kicker">Разбор · листайте</span>
+        <h2 class="lr-title">Что сейчас произошло</h2>
+        <p class="lr-lead">Вы отправили сообщение — и через минуту получили экран. Разберём, что модель делала в это время.</p>
+      </header>
+      <div class="lr-grid">
+        <div class="lr-text">
+          <div class="scene" data-s="1"><span class="sc-n">1 из 9</span><p class="sc-big">Вы отправляете сообщение.</p><p class="sc-small">Текст и картинка уходят модели вместе. Модель видит только их: ваш Figma, бренд-бук и прошлые чаты ей неизвестны.</p></div>
+          <div class="scene" data-s="2"><span class="sc-n">2 из 9</span><p class="sc-big">Модель сопоставляет слова и картинку.</p><p class="sc-small">Она ищет на картинке то, о чём вы пишете: «таймер» — цифры в центре, «кольцо» — круг вокруг них, «две кнопки» — голубые круги внизу. Чего нет ни в тексте, ни на картинке, модель додумает сама.</p></div>
+          <div class="scene" data-s="3"><span class="sc-n">3 из 9</span><p class="sc-big">Модель думает.</p><p class="sc-small">С включённым размышлением она сначала составляет план: какие блоки, какие цвета, какая логика. В интерфейсе это выглядит как «Думаю…». Без размышления модель сразу пишет код и чаще ошибается.</p></div>
+          <div class="scene" data-s="4"><span class="sc-n">4 из 9</span><p class="sc-big">Модель выбирает, на чём собрать.</p><p class="sc-small">Вы не указали технологию, поэтому модель берёт самый простой путь — веб-страницу. Её откроет любой браузер, ничего не нужно устанавливать, и чат умеет сразу её показать. Нужна другая технология — напишите об этом в сообщении.</p></div>
+          <div class="scene" data-s="5"><span class="sc-n">5 из 9</span><p class="sc-big">Сначала — что есть на экране.</p><p class="sc-small">Модель перечисляет элементы: время, подпись, кнопку. Это HTML — как список слоёв в Figma. Без оформления браузер показывает его простым текстом.</p></div>
+          <div class="scene" data-s="6"><span class="sc-n">6 из 9</span><p class="sc-big">Потом — как это выглядит.</p><p class="sc-small">Чёрный фон, шрифт, размер, цвет кнопки. Это CSS — как панель свойств в Figma.</p></div>
+          <div class="scene" data-s="7"><span class="sc-n">7 из 9</span><p class="sc-big">И как это работает.</p><p class="sc-small">Время уменьшается, кнопка ставит на паузу. Это JavaScript — как прототипирование в Figma, только логика может быть любой. Нажмите кнопку справа.</p></div>
+          <div class="scene" data-s="8"><span class="sc-n">8 из 9</span><p class="sc-big">Чат запускает результат.</p><p class="sc-small">Готовый файл открывается в окне предпросмотра — маленьком браузере внутри чата. Прототип можно нажимать, а потом опубликовать по ссылке.</p></div>
+          <div class="scene" data-s="9"><span class="sc-n">9 из 9</span><p class="sc-big">Правка переписывает код.</p><p class="sc-small">Модель заново пишет нужные строки и иногда задевает соседние. Поэтому в конце каждой правки пишите: «Больше ничего не меняй».</p></div>
+          <div class="lr-end"><button class="next" type="button" data-goto="step-5">Понятно, к шагу 5<span aria-hidden="true">→</span></button></div>
+        </div>
+        <div class="lr-stick">
+          <div class="sim" id="sim" data-scene="0" aria-hidden="true">
+            <div class="sim-head">Чат с моделью</div>
+            <div class="sim-body">
+              <div class="sp sp-chat" data-scenes="0,1,2,3">
+                <div class="feed">
+                  <div class="b-user" id="bUser">
+                    <div class="bu-img"><img src="ref.jpg" alt=""><span class="bx bx-time"></span><span class="bx bx-ring"></span><span class="bx bx-btn"></span></div>
+                    <p class="bu-text">Сделай прототип экрана по картинке: <mark class="m-time">таймер</mark>, <mark class="m-ring">волнистое кольцо</mark> и <mark class="m-btn">две кнопки</mark> внизу.</p>
+                  </div>
+                  <div class="b-model" id="bModel">
+                    <span class="bm-who">Модель</span>
+                    <div class="bm-think"><span class="dots"><i></i><i></i><i></i></span>Думаю</div>
+                    <ol class="bm-plan">
+                      <li>Блоки: шапка, кольцо, таймер, две кнопки</li>
+                      <li>Стиль: чёрный фон, шрифт Google Sans, цвета с картинки</li>
+                      <li>Логика: таймер идёт, пауза, стоп</li>
+                    </ol>
+                  </div>
+                </div>
+                <div class="composer" id="composer">
+                  <div class="cmp-att"><img src="ref.jpg" alt=""><span>washing-machine.png</span></div>
+                  <div class="cmp-line"><span class="cmp-typed" id="cmpTyped"></span><span class="caret"></span><span class="cmp-ph" id="cmpPh">Сообщение модели</span></div>
+                  <span class="cmp-send" id="cmpSend">↑</span>
+                </div>
+              </div>
+              <div class="sp sp-tech" data-scenes="4">
+                <p class="tq">На чём собрать прототип?</p>
+                <div class="opt opt-web"><b>Веб-страница</b><span>HTML, CSS, JavaScript</span><i>✓</i></div>
+                <div class="opt"><b>React</b><span>нужна сборка проекта</span></div>
+                <div class="opt"><b>SwiftUI</b><span>нужен Xcode на Mac</span></div>
+                <div class="opt"><b>Figma</b><span>сложная логика ограничена</span></div>
+                <div class="why-chips"><span>откроется в любом браузере</span><span>ничего не устанавливать</span><span>чат сразу покажет</span></div>
+              </div>
+              <div class="sp sp-build" data-scenes="5,6,7,8">
+                <div class="sb-code"><div class="sb-tabs"><span data-l="5">HTML</span><span data-l="6">CSS</span><span data-l="7">JavaScript</span></div><pre class="sb-pre" id="sbPre"></pre></div>
+                <div class="sb-prev"><div class="sb-label">Предпросмотр</div>
+                  <div class="pw l1" id="pw"><div class="pw-time" id="pwTime">2h 22m</div><div class="pw-label" id="pwLabel">remaining</div><button class="pw-btn" id="pwBtn" type="button" tabindex="-1"><span class="pw-txt">Pause</span><span class="pw-ico"></span></button></div>
+                </div>
+              </div>
+              <div class="sp sp-diff" data-scenes="9">
+                <div class="df-q">Сделай кнопку паузы больше</div>
+                <div class="df-code">
+                  <div class="dl"><span class="dt">без изменений</span><code>.time { font-size: 40px; }</code></div>
+                  <div class="dl dl-old"><span class="dt">было</span><code>.pause { width: 56px; }</code></div>
+                  <div class="dl dl-new"><span class="dt">стало</span><code>.pause { width: 64px; }</code></div>
+                  <div class="dl dl-near"><span class="dt">задето</span><code>.label { font-size: 16px; }</code></div>
+                </div>
+                <p class="df-note">Подпись под временем тоже изменилась, хотя вы об этом не просили.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step gate" data-step="5" data-gate="5" id="step-5">
+    <header class="step-h">
+      <span class="step-no">Шаг 5 из 10 · ≈ 10 мин</span>
+      <h2>Сравните с картинкой</h2>
+      <div class="mode" data-mode="strong"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 4</p>
+    <div class="step-body">
+      <div class="vx" data-vx="5"></div>
+      <ul class="todo">
+        <li>Откройте картинку и прототип рядом, в одном масштабе.</li>
+        <li>Увеличьте картинку и сверьте части по списку ниже.</li>
+        <li>Нашли различия — снова прикрепите картинку и отправьте текст ниже.</li>
+      </ul>
+      <div class="verify">
+        <span class="verify-title">Что сверять</span>
+        <ul class="verify-list">
+          <li>Шрифт тот же, а не похожий</li>
+          <li>Текст стоит по центру и не прыгает, когда строка исчезает</li>
+          <li>Размеры текста совпадают до пикселя</li>
+          <li>Количество повторов совпадает: сколько гребней у волны</li>
+          <li>Концы линий: выпрямляются или продолжают изгиб</li>
+          <li>Подложки и тени под элементами</li>
+          <li>Подложку видно на экране телефона</li>
+          <li>Движение: скорость ровная, форма при движении не растягивается</li>
+        </ul>
+      </div>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Сообщение 2, если нужно</span><button class="copy" type="button">Скопировать</button></div><pre>Прикладываю исходную картинку ещё раз. Сравни с ней свой результат по частям: шапка, кольцо, текст внутри кольца, кнопки. Отдельно проверь шрифт, размеры текста, количество гребней волны, форму концов линии, подложку под кольцом и расстояния. Перечисли различия списком «на картинке → у тебя», потом исправь только их.</pre></div>
+      <p class="why"><b>Почему так:</b> модель смотрит на картинку целиком и пропускает мелочи: концы линий, тёмные подложки, число повторов. В примере на шаге 8 последняя правка целиком состояла из таких мелочей.</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="5">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="6" data-gate="6" id="step-6">
+    <header class="step-h">
+      <span class="step-no">Шаг 6 из 10 · ≈ 10 мин</span>
+      <h2>Оживите экран</h2>
+      <div class="mode" data-mode="strong"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 5</p>
+    <div class="step-body">
+      <div class="vx" data-vx="6"></div>
+      <ul class="todo">
+        <li>Скопируйте текст и отправьте.</li>
+        <li>Проверьте, что волна бежит по кругу, а время уменьшается.</li>
+      </ul>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Сообщение 3</span><button class="copy" type="button">Скопировать</button></div><pre>Добавь движение — плавное и спокойное.
+
+1. Появление: при открытии белая часть кольца плавно прорисовывается от нуля до своей длины за 1,2 секунды. Текст внутри проявляется с лёгким сдвигом снизу вверх.
+
+2. Волна: волнистая линия всё время бежит вдоль кольца от начала к концу белой части, как вода в барабане. Скорость постоянная, без замедлений. Форма волны при этом не меняется: гребни одинаковой высоты и на равном расстоянии, линия построена плавными кривыми Безье без изломов. Концы линии не выпрямляются и повторяют изгиб волны, как на картинке.
+
+3. Таймер: «12 sec» уменьшается каждую секунду. На нуле строки «12 sec» и «To start drying» плавно исчезают, а «Currently washing» меняется на «Currently drying». После этого «2h 22m» вместе с «remaining» плавно, без рывка, перемещается в точный центр кольца.
+
+4. Время «2h 22m» уменьшается на минуту каждую минуту, а белая часть кольца растёт вместе с ним.
+
+5. Если в настройках телефона включено «Уменьшение движения», волна стоит на месте.
+
+Внешний вид не меняй.</pre></div>
+      <p class="why"><b>Почему так:</b> просите по одному. Сначала внешний вид, потом движение, потом нажатия. Так модель реже ломает то, что уже работает.</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="6">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="7" data-gate="7" id="step-7">
+    <header class="step-h">
+      <span class="step-no">Шаг 7 из 10 · ≈ 10 мин</span>
+      <h2>Добавьте нажатия</h2>
+      <div class="mode" data-mode="strong"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 6</p>
+    <div class="step-body">
+      <div class="vx" data-vx="7"></div>
+      <ul class="todo">
+        <li>Скопируйте текст и отправьте.</li>
+        <li>Понажимайте все кнопки в окне с прототипом.</li>
+      </ul>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Сообщение 4</span><button class="copy" type="button">Скопировать</button></div><pre>Добавь реакцию на нажатия. Каждая кнопка при нажатии слегка сжимается и возвращается.
+
+1. Пауза (левая кнопка внизу): волна за 0,8 секунды тормозит по инерции и выпрямляется с лёгким пружинным откликом (небольшой перелёт и успокоение), время останавливается, «Currently washing» меняется на «Paused», значок паузы становится треугольником «play». Повторное нажатие всё возвращает.
+
+2. Стоп (правая кнопка): снизу выезжает панель с вопросом «Stop the cycle?» и кнопками «Cancel» и «Stop». После «Stop» белая часть кольца плавно уменьшается до нуля, под кольцом пишется «Stopped». Кнопка «play» запускает всё заново.
+
+3. Питание (зелёная кнопка): экран плавно гаснет, кнопка становится серой. Повторное нажатие включает обратно.
+
+4. Три точки: рядом появляется небольшое меню «Schedule», «Settings», «Help». Нажатие мимо меню его закрывает.
+
+5. Крестик: экран уезжает вниз, вместо него надпись «Closed» и кнопка «Open again».
+
+Остальное не меняй.</pre></div>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="7">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="8" data-gate="8" id="step-8">
+    <header class="step-h">
+      <span class="step-no">Шаг 8 из 10 · ≈ 20 мин</span>
+      <h2>Дайте обратную связь</h2>
+      <div class="mode" data-mode="strong"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 7</p>
+    <div class="step-body">
+      <div class="vx" data-vx="8"></div>
+      <ul class="todo">
+        <li>Пройдите сценарий как пользователь: запустите, поставьте на паузу, остановите. Время, кольцо и подписи должны меняться так же, как в приложении.</li>
+        <li>Запишите замечания и отправьте их одним сообщением: что не так → как должно быть → что не трогать.</li>
+        <li>Проверьте новую версию. Остались замечания — повторите.</li>
+      </ul>
+
+      <div class="chat" aria-label="Пример диалога с моделью">
+        <div class="chat-title">Пример: пять версий одного прототипа</div>
+
+        <div class="msg ai">
+          <span class="who">Модель</span>
+          <div class="bubble">Готово. Экран повторяет картинку, волна движется, кнопки работают.</div>
+          <div class="iter">
+            <div class="wm-host" data-wm="1" data-w="230"></div>
+            <div class="iter-side">
+              <span class="ver">Версия 1</span>
+              <span>Что заметил дизайнер:</span>
+              <ul class="pins">
+                <li><i>1</i><span>Время стоит не по центру кольца и рывком прыгает, когда исчезает «12 sec».</span></li>
+                <li><i>2</i><span>Волна дёргается на месте, как червяк, а не бежит по кругу.</span></li>
+                <li><i>3</i><span>Шрифт похож, но не тот, что на картинке.</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p class="thought"><b>Как сказали бы коллеге</b>«Время не по центру, червячок как-то странно ползает, и шрифты, кажется, не те».</p>
+
+        <div class="msg me">
+          <span class="who">Вы → модели</span>
+          <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Обратная связь 1</span><button class="copy" type="button">Скопировать</button></div><pre>Нужны три правки. Остальное не меняй.
+
+1. Время не по центру. Блок «2h 22m / remaining / 12 sec / To start drying» выровняй строго по центру кольца по горизонтали и вертикали. Когда строка «12 sec» исчезает, «2h 22m» вместе с «remaining» должно плавно, без рывка, встать в точный центр кольца, а не висеть над пустым местом.
+
+2. Волна ведёт себя странно: дёргается на месте, а не движется по кругу. Сделай её как индикатор прогресса: волна плавно бежит вдоль кольца от начала к концу белой части, а концы линии повторяют её изгиб, как на картинке.
+
+3. Шрифт не совпадает с картинкой. Там Google Sans: округлые буквы, обычный вес. Подключи Google Sans из Google Fonts для всего текста на экране.</pre></div>
+        </div>
+
+        <div class="msg ai">
+          <span class="who">Модель</span>
+          <div class="bubble">Исправил: время по центру и плавно встаёт в середину кольца, шрифт Google Sans, волна бежит по кругу.</div>
+          <div class="iter">
+            <div class="wm-host" data-wm="2" data-w="230"></div>
+            <div class="iter-side">
+              <span class="ver">Версия 2</span>
+              <p class="verdict">Выглядит как на картинке. Но время идёт, а кольцо стоит на месте. Сушка меняет только подпись.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="thought"><b>Как сказали бы коллеге</b>«Это должно работать как реальный продукт, чтобы прогресс считывался и считался».</p>
+
+        <div class="msg me">
+          <span class="who">Вы → модели</span>
+          <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Обратная связь 2</span><button class="copy" type="button">Скопировать</button></div><pre>Теперь свяжи данные, чтобы прототип работал как приложение.
+
+1. Вся стирка длится 3 ч 54 мин. Белая часть кольца показывает, сколько уже прошло, а время в центре — сколько осталось. Эти значения всегда совпадают: время уменьшается — кольцо растёт.
+
+2. Через 12 секунд стирка переходит в сушку: подпись «Currently drying», температура «60°», строки «12 sec» и «To start drying» исчезают.
+
+3. Когда время закончится, кольцо заполнено целиком, волна выпрямляется, подпись «Done».
+
+4. Пауза останавливает и время, и кольцо. Стоп сбрасывает прогресс до нуля.
+
+5. Добавь под телефоном переключатель скорости «×1 / ×60», чтобы на показе было видно, как заполняется кольцо.
+
+Внешний вид не меняй.</pre></div>
+        </div>
+
+        <div class="msg ai">
+          <span class="who">Модель</span>
+          <div class="bubble">Теперь кольцо и время связаны, есть переход в сушку, завершение и переключатель скорости.</div>
+          <div class="iter">
+            <div class="wm-host" data-wm="3" data-w="230"></div>
+            <div class="iter-side">
+              <span class="ver">Версия 3</span>
+              <p class="verdict">Кольцо и время связаны: включите ×60 и посмотрите, как заполняется кольцо.</p>
+              <p class="verdict">Но линия собрана из прямых отрезков, а на паузе волна замирает мгновенно.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="thought"><b>Как сказали бы коллеге</b>«Червячок двигается неестественно. Нужно, чтобы изгибы ощущались и имели вес».</p>
+
+        <div class="msg me">
+          <span class="who">Вы → модели</span>
+          <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Обратная связь 3</span><button class="copy" type="button">Скопировать</button></div><pre>Нужна правка движения волны. Сейчас линия собрана из прямых отрезков, а на паузе волна замирает мгновенно, как выключенная картинка.
+
+Сделай движение физически правдоподобным: изгибы должны ощущаться и иметь вес. Линию строй плавными кривыми Безье. На паузе волна тормозит по инерции за 0,8 секунды и выпрямляется с лёгким пружинным откликом, при продолжении плавно разгоняется.
+
+Остальное не меняй.</pre></div>
+        </div>
+
+        <div class="msg ai">
+          <span class="who">Модель</span>
+          <div class="bubble">Добавил вес: кривые Безье, гребни с наклоном вперёд, волна «дышит» и идёт толчками, на паузе тормозит по инерции.</div>
+          <div class="iter">
+            <div class="wm-host" data-wm="4" data-w="230"></div>
+            <div class="iter-side">
+              <span class="ver">Версия 4</span>
+              <p class="verdict">Пауза с инерцией получилась. Но модель перестаралась: волну растянуло, гребни разные, появились замедления.</p>
+              <p class="verdict">Сверка с картинкой по частям нашла ещё три отличия: гребней меньше, концы выпрямлены, нет подложки.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="thought"><b>Как сказали бы коллеге</b>«Червячка растянуло, замедление лишнее, волны должны быть чаще. Проверь изгибы на концах и подложку сзади, её плохо видно».</p>
+
+        <div class="msg me">
+          <span class="who">Вы → модели</span>
+          <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Обратная связь 4 · сверка с картинкой</span><button class="copy" type="button">Скопировать</button></div><pre>Прикладываю исходную картинку ещё раз. Я сверил с ней прототип по частям, нужны точные правки. Остальное не меняй.
+
+1. Форма волны: её растянуло, гребни разной высоты и ширины. Форма должна быть жёсткой: все гребни одинаковые и на равном расстоянии. Не растягивай, не сжимай и не наклоняй их.
+
+2. Скорость: убери замедления. Волна бежит с постоянной скоростью. Инерция остаётся только при паузе и продолжении.
+
+3. Частота: на картинке 6 гребней, примерно через каждые 25°, а белая часть занимает около 136° круга. Сделай так же.
+
+4. Концы: сейчас они выпрямляются. На картинке они продолжают изгиб: верхний конец загибается крючком, нижний уходит наружу.
+
+5. Положение: середина волны проходит на 10 пикселей ближе к центру, чем серая линия.
+
+6. Подложка: под кольцом на картинке есть тёмное кольцо шириной около 36 пикселей, от внутреннего края волны до внешнего края серой линии. Сделай его заметным (#151517), а серую линию светлее (#303034).</pre></div>
+        </div>
+
+        <div class="msg ai">
+          <span class="who">Модель</span>
+          <div class="bubble">Сверил с картинкой: форма жёсткая, скорость ровная, 6 гребней, концы закручены, волна сдвинута к центру, подложка видна.</div>
+          <div class="iter">
+            <div class="wm-host" data-wm="5" data-w="230"></div>
+            <div class="iter-side">
+              <span class="ver">Версия 5 · итог</span>
+              <p class="verdict good">Совпадает с картинкой, таймер и кнопки работают.</p>
+              <p class="verdict">Сравните с версией 4: та же инерция на паузе, но форма как на картинке.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="why"><b>Почему так:</b> модель не знает, что для вас «странно», и додумывает. В примере просьба «добавь вес» превратилась в растянутую волну. Пишите, как элемент ведёт себя в приложении и что менять нельзя. Потом сверяйте с картинкой по частям.</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="8">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="9" data-gate="9" id="step-9">
+    <header class="step-h">
+      <span class="step-no">Шаг 9 из 10 · ≈ 10 мин</span>
+      <h2>Поправьте мелочи</h2>
+      <div class="mode" data-mode="fast"></div>
+    </header>
+    <p class="locked-note">Откроется после шага 8</p>
+    <div class="step-body">
+      <div class="vx" data-vx="9"></div>
+      <ul class="todo">
+        <li>Одна просьба — одно сообщение.</li>
+        <li>В конце каждой просьбы пишите «Больше ничего не меняй».</li>
+        <li data-pv="restore"></li>
+      </ul>
+      <div class="prompts">
+        <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Пример</span><button class="copy" type="button">Скопировать</button></div><pre>Сделай волну на кольце мельче и чаще. Больше ничего не меняй.</pre></div>
+        <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Пример</span><button class="copy" type="button">Скопировать</button></div><pre>Сделай две кнопки внизу на 8 пикселей больше. Больше ничего не меняй.</pre></div>
+        <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Пример</span><button class="copy" type="button">Скопировать</button></div><pre>Кнопка «Stop» не работает: панель не появляется. Найди причину и исправь. Больше ничего не меняй.</pre></div>
+      </div>
+      <p class="why"><b>Почему так:</b> когда просьб в сообщении несколько, модель заодно переделывает то, что работало.</p>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="9">Готово, дальше<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="step gate" data-step="10" data-gate="10" id="step-10">
+    <header class="step-h">
+      <span class="step-no">Шаг 10 из 10 · ≈ 3 мин</span>
+      <h2>Поделитесь</h2>
+      
+    </header>
+    <p class="locked-note">Откроется после шага 9</p>
+    <div class="step-body">
+      <div class="vx" data-vx="10"></div>
+      
+      <ul class="todo" data-pv-list="share"></ul>
+    </div>
+    <div class="step-foot"><button class="next" type="button" data-next="10">Готово, к итогам<span aria-hidden="true">→</span></button></div>
+  </section>
+
+  <section class="finish gate" data-gate="11" id="finish">
+    <div class="lr-locked fin-locked"><span class="ch-kicker">Финал</span><b>Что дальше: подходы, технологии, правила</b><span>Откроется после шага 10</span></div>
+    <div class="fin-in">
+      <div class="sep" aria-hidden="true">···</div>
+      <span class="ch-kicker">Финал</span>
+      <h2 class="fin-title">Прототип готов</h2>
+      <p class="fin-lead">Вы прошли путь от картинки до живого экрана. Три темы ниже помогут делать следующие прототипы быстрее и осознаннее.</p>
+      <section class="chapter-part" id="approaches">
+    <span class="ch-kicker">Что дальше · 1</span>
+    <h2>Два подхода к прототипу</h2>
+    <p class="ch-lead">Прототип можно собрать двумя способами. Результат одинаковый, но время и опыт разные.</p>
+    <div class="ap-tabs" role="tablist" aria-label="Подход">
+      <button type="button" role="tab" aria-selected="true" data-ap="iter">Итерациями</button>
+      <button type="button" role="tab" aria-selected="false" data-ap="spec">Одной спецификацией</button>
+    </div>
+    <div class="ap-panel" data-ap-panel="iter" role="tabpanel">
+      <p class="ap-big">Начинаете с короткой задачи, смотрите результат и поправляете. Детали появляются по ходу.</p>
+      <ul class="ap-facts">
+        <li><b>Когда</b>Идея сырая, вы ищете решение</li>
+        <li><b>Сообщений</b>6–10</li>
+        <li><b>Размышление</b>На сложных шагах</li>
+        <li><b>Риск</b>В длинном чате модель забывает ранние договорённости</li>
+      </ul>
+      <p class="ap-note">Вы только что прошли этот путь. На шаге 8 видно, как по ходу правок появлялись детали.</p>
+    </div>
+    <div class="ap-panel" data-ap-panel="spec" role="tabpanel" hidden>
+      <p class="ap-big">Сразу описываете всё: внешний вид, движение, логику и технологию. Модель собирает прототип за одно-два сообщения.</p>
+      <ul class="ap-facts">
+        <li><b>Когда</b>Макет готов, поведение известно</li>
+        <li><b>Сообщений</b>1–3</li>
+        <li><b>Размышление</b>Включите сразу</li>
+        <li><b>Риск</b>В длинном тексте модель может что-то пропустить</li>
+      </ul>
+      <ol class="ap-steps">
+        <li>Откройте сервис и выберите сильную модель с размышлением — шаги 1–2.</li>
+        <li>Приложите картинку — шаг 3.</li>
+        <li>Отправьте спецификацию ниже.</li>
+        <li>Сверьте результат по чек-листу шага 5 и поправьте мелочи — шаг 9.</li>
+      </ol>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Спецификация</span><button class="copy" type="button">Скопировать</button></div><pre>Сделай интерактивный прототип экрана по картинке, которую я прикрепил: экран управления стиральной машиной в приложении умного дома. Сначала составь короткий план: блоки, анимации, логика. Потом собери всё за один раз.
+
+Технология
+— один HTML-файл: разметка, стили и скрипт внутри;
+— без библиотек, кроме шрифта Google Sans из Google Fonts;
+— цвета, размеры и длительности — в CSS-переменных.
+
+Внешний вид
+— экран 390 × 844 по центру страницы, фон экрана чёрный, текст на английском, как на картинке;
+— сверху крестик и заголовок «Washing machine», 21 px; справа круглые кнопки 38 px: зелёная #8BD88B с иконкой питания и серая #E8E8EA с тремя точками;
+— кольцо диаметром 280 px, центр в 320 px от верха экрана; под кольцом подложка #151517 шириной 36 px;
+— 40% кольца — белая волна толщиной 14 px: 6 одинаковых гребней через 25°, от «12 часов» против часовой стрелки до «7 часов»; середина волны на 10 px ближе к центру, чем серая линия; концы продолжают изгиб;
+— остальное кольцо — серая линия #303034 толщиной 10 px, с зазорами;
+— в центре кольца, строго по центру: «2h 22m» 42 px, «remaining» 14 px #8E8E93, отступ 28 px, «12 sec» 19 px, «To start drying» 14 px;
+— под кольцом: «Wash and dry» 22 px, «Currently washing» 15 px, «Temperature: 40°» 14 px серым;
+— внизу две голубые кнопки #C9E3FB по 70 px: пауза и стоп.
+
+Движение
+— при открытии кольцо прорисовывается за 1,2 с, текст проявляется снизу вверх;
+— волна бежит по кругу с постоянной скоростью; форма жёсткая, кривые Безье без изломов;
+— кнопки при нажатии слегка сжимаются;
+— при включённом «Уменьшении движения» волна стоит.
+
+Логика
+— стирка длится 3 ч 54 мин; кольцо показывает прошедшее время, центр — оставшееся, значения всегда совпадают;
+— через 12 с начинается сушка: «Currently drying», 60°, строки «12 sec» и «To start drying» исчезают, время плавно встаёт в центр кольца;
+— в конце кольцо полное, волна ровная, подпись «Done».
+
+Нажатия
+— пауза: волна за 0,8 с тормозит по инерции и выпрямляется с лёгкой пружиной, время стоит, подпись «Paused», иконка меняется на play;
+— стоп: панель «Stop the cycle?» с кнопками «Cancel» и «Stop»; после «Stop» кольцо плавно уходит в ноль, подпись «Stopped»;
+— питание: экран гаснет, кнопка становится серой; три точки: меню «Schedule», «Settings», «Help»; крестик: экран уезжает вниз, «Closed» и «Open again»;
+— под телефоном переключатель скорости «×1 / ×60».
+
+Перед ответом проверь себя по картинке: шрифт, центр текста, 6 гребней, изгиб концов, подложка. В конце перечисли решения, которые ты принял сам.</pre></div>
+    </div>
+    <p class="why"><b>Как переключаться:</b> начните итерациями, а удачные формулировки из правок соберите в спецификацию для следующего экрана. Спецификация выше так и получилась: это шаги 4, 6, 7 и все правки из шага 8 в одном тексте.</p>
+      </section>
+      <section class="chapter-part" id="tech">
+    <span class="ch-kicker">Что дальше · 2</span>
+    <h2>Технологии и как на них влиять</h2>
+    <p class="ch-lead">Модель выбрала веб, потому что вы не сказали иначе. Технологию можно задать самому: одной строкой в сообщении.</p>
+    <div class="opts">
+      <article class="opt-card is-default"><header><b>Веб-страница</b><span class="opt-tag">по умолчанию</span></header><p class="opt-sub">HTML + CSS + JavaScript в одном файле</p>
+        <dl><dt>Плюсы</dt><dd>Открывается в любом браузере, чат сразу показывает предпросмотр, быстрее всего</dd><dt>Минусы</dt><dd>Один файл тяжело развивать в большой продукт</dd><dt>Когда брать</dt><dd>Первый прототип, показ идеи</dd></dl></article>
+      <article class="opt-card"><header><b>React + Tailwind</b></header><p class="opt-sub">Компоненты, как в Figma</p>
+        <dl><dt>Плюсы</dt><dd>Так пишут продукты. v0, Lovable и Bolt используют его по умолчанию</dd><dt>Минусы</dt><dd>Нужна сборка проекта, в простом чате предпросмотр бывает не всегда</dd><dt>Когда брать</dt><dd>Несколько экранов, передача разработчикам</dd></dl></article>
+      <article class="opt-card"><header><b>SwiftUI или Jetpack Compose</b></header><p class="opt-sub">Нативный код для iPhone или Android</p>
+        <dl><dt>Плюсы</dt><dd>Настоящие жесты и системные анимации</dd><dt>Минусы</dt><dd>Нужны Xcode или Android Studio и симулятор</dd><dt>Когда брать</dt><dd>Проверка ощущений на телефоне</dd></dl></article>
+      <article class="opt-card"><header><b>Figma Make</b></header><p class="opt-sub">Прототип прямо в Figma</p>
+        <dl><dt>Плюсы</dt><dd>Без кода, рядом с макетом</dd><dt>Минусы</dt><dd>Сложная логика ограничена</dd><dt>Когда брать</dt><dd>Быстрый кликабельный сценарий</dd></dl></article>
+    </div>
+    <h3>Как задать технологию</h3>
+    <div class="prompts">
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">По умолчанию в этом гайде</span><button class="copy" type="button">Скопировать</button></div><pre>Собери прототип одним HTML-файлом: разметка, стили и скрипт внутри, без библиотек.</pre></div>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Для передачи разработчикам</span><button class="copy" type="button">Скопировать</button></div><pre>Собери прототип на React и Tailwind. Раздели экран на компоненты: шапка, кольцо прогресса, блок статуса, кнопки управления.</pre></div>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Для проверки на iPhone</span><button class="copy" type="button">Скопировать</button></div><pre>Собери этот экран на SwiftUI. Я открою проект в Xcode и запущу в симуляторе iPhone.</pre></div>
+    </div>
+    <h3>Как научиться выбирать самому</h3>
+    <div class="prompts">
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Попросите варианты</span><button class="copy" type="button">Скопировать</button></div><pre>Прежде чем писать код, предложи 2–3 варианта технологий для этого прототипа. Для каждого: плюсы, минусы и когда его брать. Выбор оставь мне.</pre></div>
+      <div class="prompt"><div class="prompt-head"><span class="prompt-tag">Попросите объяснить</span><button class="copy" type="button">Скопировать</button></div><pre>Объясни простыми словами, из чего собран прототип: что в HTML, что в CSS, что в JavaScript. Покажи, где задаётся цвет кнопки паузы и где — реакция на нажатие.</pre></div>
+    </div>
+    <p class="why"><b>Почему так:</b> когда модель объясняет решения, вы учитесь их оценивать. В следующий раз вы сами скажете, какую технологию взять и почему, а не скопируете чужой промпт.</p>
+      </section>
+      <section class="rules chapter-part">
+    <span class="ch-kicker">Что дальше · 3</span>
+    <h2>Семь правил</h2>
+    <ol>
+      <li><b>Показывайте картинку.</b> <span>С ней модель ошибается реже, чем с одним описанием.</span></li>
+      <li><b>Одна просьба за раз.</b> <span>Внешний вид → движение → нажатия → мелочи.</span></li>
+      <li><b>Говорите конкретно.</b> <span>«На 8 пикселей больше», а не «покрупнее».</span></li>
+      <li><b>Проверяйте сценарий.</b> <span>Нажмите каждую кнопку: время, кольцо и подписи должны меняться вместе.</span></li>
+      <li><b>Сверяйте по частям.</b> <span>Увеличьте картинку и проверьте детали: концы линий, подложки, число повторов.</span></li>
+      <li><b>Модель под задачу.</b> <span>Сильная с размышлением для сборки и сложных правок, быстрая для мелочей.</span></li>
+      <li><b>Спрашивайте «почему».</b> <span>Просите модель объяснять решения: какую технологию она взяла и зачем.</span></li>
+    </ol>
+  </section>
+    </div>
+  </section>
+
+  <p class="foot">Прогресс и выбор сервиса сохраняются только в этом браузере.</p>
+</main>
+<button class="sample-pill" type="button" id="samplePill" hidden>Образец</button>
+<div class="modal" id="sample" hidden>
+  <div class="modal-card">
+    <button class="modal-x" type="button" id="sampleClose" aria-label="Закрыть">×</button>
+    <div class="wm-host" data-wm="5" data-w="280" data-final="1"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const REDUCE_UI=(()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
+const store={get(k,d){try{const v=localStorage.getItem('proto-ai2:'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('proto-ai2:'+k,JSON.stringify(v))}catch(e){}}};
+
+/* copy */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.copy');if(!b)return;
+  const pre=b.closest('.prompt').querySelector('pre');
+  const ok=()=>{b.textContent='Скопировано';b.classList.add('ok');setTimeout(()=>{b.textContent='Скопировать';b.classList.remove('ok')},1600)};
+  const fallback=()=>{try{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Нажмите ⌘C'}catch(_){}};
+  try{navigator.clipboard.writeText(pre.textContent).then(ok,fallback)}catch(_){fallback()}
+});
+
+/* providers */
+const FREE='Хватит бесплатного тарифа. Число сообщений в день на нём ограничено.';
+const TAIL=['Откройте ссылку на телефоне и проверьте, что прототип работает.','Отправьте ссылку коллегам.'];
+const PV={
+  claude:{name:'Claude',site:'claude.ai',note:'Предпросмотр открывается в чате, рядом с ответом.',
+    open:['Зайдите на claude.ai и войдите в аккаунт.','Нажмите «Новый чат».'],plan:FREE,prefix:'',
+    preview:'Справа в чате появится экран. Подождите, пока он загрузится.',
+    restore:'Правка сломала прототип — вернитесь к прошлой версии переключателем над окном с прототипом.',
+    share:['Нажмите «Опубликовать» над окном с прототипом и скопируйте ссылку.'].concat(TAIL)},
+  chatgpt:{name:'ChatGPT',site:'chatgpt.com',note:'Для прототипа нужен режим Canvas.',
+    open:['Зайдите на chatgpt.com и войдите в аккаунт.','Начните новый чат.','В поле ввода откройте инструменты (кнопка «+») и включите Canvas.'],plan:FREE,
+    prefix:'Работай в Canvas и сделай всё одним файлом, чтобы я мог открыть предпросмотр.\n\n',
+    preview:'Справа откроется Canvas. Если видите код, нажмите «Предпросмотр» (Preview) вверху.',
+    restore:'Правка сломала прототип — откройте прошлую версию в Canvas.',
+    share:['Нажмите «Поделиться» в Canvas или вверху чата и скопируйте ссылку.'].concat(TAIL)},
+  gemini:{name:'Gemini',site:'gemini.google.com',note:'Для прототипа нужен режим Canvas.',
+    open:['Зайдите на gemini.google.com и войдите в аккаунт Google.','В поле ввода нажмите «Canvas».'],plan:FREE,
+    prefix:'Сделай это в Canvas одним файлом, чтобы я сразу видел предпросмотр.\n\n',
+    preview:'Справа откроется Canvas. Если видите код, переключитесь на «Предпросмотр» (Preview).',
+    restore:'Правка сломала прототип — откройте прошлую версию в Canvas или напишите: «Верни прошлую версию».',
+    share:['Нажмите «Поделиться» в Canvas и скопируйте ссылку.'].concat(TAIL)},
+  v0:{name:'v0',site:'v0.app',note:'Сервис для интерфейсов. Ссылку на прототип даёт одна кнопка.',
+    open:['Зайдите на v0.app и войдите в аккаунт.','Поле для сообщения — на главной странице.'],plan:FREE,prefix:'',
+    preview:'Справа появится предпросмотр. Сборка занимает до минуты.',
+    restore:'Правка сломала прототип — откройте прошлую версию: она есть у каждого ответа в чате.',
+    share:['Нажмите «Publish» в правом верхнем углу и скопируйте ссылку.'].concat(TAIL)},
+  lovable:{name:'Lovable',site:'lovable.dev',note:'Собирает приложения из нескольких экранов и публикует их по ссылке.',
+    open:['Зайдите на lovable.dev и войдите в аккаунт.','Поле для сообщения — на главной странице.'],plan:FREE,prefix:'',
+    preview:'Справа появится предпросмотр. Первая сборка занимает до минуты.',
+    restore:'Правка сломала прототип — найдите в чате прошлую версию и нажмите «Restore».',
+    share:['Нажмите «Publish» в правом верхнем углу и скопируйте ссылку.'].concat(TAIL)},
+  bolt:{name:'Bolt',site:'bolt.new',note:'Собирает черновики приложений в браузере.',
+    open:['Зайдите на bolt.new и войдите в аккаунт.','Поле для сообщения — на главной странице.'],plan:FREE,prefix:'',
+    preview:'Справа появится предпросмотр. Первая сборка занимает до минуты.',
+    restore:'Правка сломала прототип — откатитесь к прошлой версии через историю чата.',
+    share:['Нажмите «Deploy» или «Publish» вверху и скопируйте ссылку.'].concat(TAIL)},
+  figma:{name:'Figma Make',site:'figma.com',note:'Работает внутри Figma. Вместо картинки вставьте свой фрейм.',
+    open:['Зайдите на figma.com и войдите в аккаунт.','Создайте новый файл Figma Make: «Создать» → «Make».'],
+    plan:'Часть возможностей Figma Make доступна только на платных тарифах.',prefix:'',
+    preview:'Справа появится предпросмотр.',
+    restore:'Правка сломала прототип — откройте историю версий и вернитесь к прошлой.',
+    share:['Нажмите «Publish» и скопируйте ссылку.'].concat(TAIL)}
+};
+let pv=store.get('pv','claude');if(!PV[pv])pv='claude';
+function renderPV(){
+  const p=PV[pv];
+  $('#pvGrid').innerHTML=Object.keys(PV).map(k=>`<button class="pv" type="button" data-k="${k}" aria-pressed="${k===pv}"><b>${PV[k].name}</b><span>${PV[k].site}</span></button>`).join('');
+  $('#pvNote').textContent=p.note;
+  document.querySelectorAll('[data-pv]').forEach(el=>{el.textContent=p[el.dataset.pv]});
+  document.querySelectorAll('[data-pv-list]').forEach(el=>{el.innerHTML='';p[el.dataset.pvList].forEach(t=>{const li=document.createElement('li');li.textContent=t;el.appendChild(li)})});
+}
+const PVM={
+  claude:{strong:'Opus 5.5 или самая сильная в списке',balanced:'Sonnet 5.5',fast:'Haiku 5.5',think:'в поле ввода откройте меню инструментов и включите «Расширенное мышление» (Extended thinking).'},
+  chatgpt:{strong:'GPT в режиме Thinking',balanced:'GPT в режиме Auto',fast:'GPT в режиме Instant',think:'в списке моделей выберите Thinking или в инструментах поля ввода включите «Думать дольше».'},
+  gemini:{strong:'Gemini Pro',balanced:'Gemini Pro',fast:'Gemini Flash',think:'выберите Pro или вариант с подписью Thinking в списке моделей: эти модели размышляют сами.'},
+  v0:{strong:'самая сильная модель в списке',balanced:'стандартная модель',fast:'быстрая модель (Mini)',think:'отдельного переключателя обычно нет: сильная модель размышляет сама. Для сложных задач добавьте текст ниже.'},
+  lovable:{strong:'выбирается автоматически',balanced:'выбирается автоматически',fast:'выбирается автоматически',think:'для сложной задачи сначала включите режим обсуждения (Chat mode), чтобы модель составила план, а потом попросите его выполнить.'},
+  bolt:{strong:'выбирается автоматически',balanced:'выбирается автоматически',fast:'выбирается автоматически',think:'отдельного переключателя обычно нет. Перед сложной задачей отправьте текст ниже.'},
+  figma:{strong:'выбирается автоматически',balanced:'выбирается автоматически',fast:'выбирается автоматически',think:'отдельного переключателя обычно нет. Перед сложной задачей отправьте текст ниже.'}
+};
+function renderPVM(){
+  const m=PVM[pv]||PVM.claude;
+  document.querySelectorAll('[data-pvm]').forEach(el=>{el.textContent=m[el.dataset.pvm]});
+  document.querySelectorAll('[data-mode]').forEach(el=>{
+    const strong=el.dataset.mode==='strong';
+    el.innerHTML='<span>Модель:</span> <b></b> <i class="'+(strong?'on':'off')+'">'+(strong?'размышление вкл':'размышление выкл')+'</i>';
+    el.querySelector('b').textContent=(strong?m.strong:m.fast).split(' или ')[0].replace(/ \(Mini\)$/,'');
+  });
+}
+$('#pvGrid').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;pv=b.dataset.k;store.set('pv',pv);renderPV();renderPVM()});
+renderPV();renderPVM();
+
+
+/* ---------- washing machine prototype, three versions ---------- */
+const REDUCE=(()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
+const ICON={
+  x:'<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  power:'<svg class="i" viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></svg>',
+  more:'<svg viewBox="0 0 24 24" style="fill:currentColor"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg>',
+  pause:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg>',
+  play:'<svg viewBox="0 0 24 24" style="fill:currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+  stop:'<svg class="i" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>'
+};
+const TPL=v=>`
+  <div class="ws-island"></div>
+  <div class="ws-status"><span>9:41</span><span class="ws-sig"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 26 12"><rect x="0.5" y="0.5" width="22" height="11" rx="3.5" fill="none" stroke="#fff" opacity=".5"/><rect x="2" y="2" width="19" height="8" rx="2"/><rect x="24" y="4" width="2" height="4" rx="1" opacity=".5"/></svg></span></div>
+  <div class="ws-content">
+    <div class="ws-top">
+      <button class="ws-x" type="button" data-a="close" aria-label="Закрыть">${ICON.x}</button>
+      <div class="ws-title">Washing machine</div>
+      <button class="ws-ib ws-power" type="button" data-a="power" aria-label="Питание">${ICON.power}</button>
+      <button class="ws-ib ws-more" type="button" data-a="more" aria-label="Меню">${ICON.more}</button>
+    </div>
+    <div class="ws-ring">
+      <svg class="ring" viewBox="0 0 300 300" aria-hidden="true">
+        ${v===5?'<circle cx="150" cy="150" r="126.4" fill="none" stroke="#151517" stroke-width="32.7"/>':''}
+        <path class="trk" fill="none" stroke="${v===5?'#303034':'#1E1E1E'}" stroke-width="9" stroke-linecap="round"/>
+        <path class="wav" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="ws-center ws-in">
+        <div class="ws-time">2h 22m</div>
+        <div class="ws-sm">remaining</div>
+        <div class="ws-sec-wrap"><div class="ws-sec">12 sec</div><div class="ws-sm">To start drying</div></div>
+      </div>
+    </div>
+    <div class="ws-info ws-in" style="animation-delay:.15s">
+      <div class="ws-mode">Wash and dry</div>
+      <div class="ws-state">Currently washing</div>
+      <div class="ws-temp">Temperature: 40°</div>
+    </div>
+    <div class="ws-btns">
+      <button class="ws-big" type="button" data-a="pause" aria-label="Пауза">${ICON.pause}</button>
+      <button class="ws-big" type="button" data-a="stop" aria-label="Стоп">${ICON.stop}</button>
+    </div>
+  </div>
+  <div class="ws-dim"></div>
+  <div class="ws-menu hide"><button type="button" data-a="menuitem">Schedule</button><button type="button" data-a="menuitem">Settings</button><button type="button" data-a="menuitem">Help</button></div>
+  <div class="ws-scrim hide" data-a="cancel"></div>
+  <div class="ws-sheet hide"><b>Stop the cycle?</b><p>The machine will drain the water and unlock the door.</p><div class="ws-sheet-btns"><button class="ws-cancel" type="button" data-a="cancel">Cancel</button><button class="ws-stopok" type="button" data-a="stopok">Stop</button></div></div>
+  <div class="ws-closed"><span>Closed</span><button type="button" data-a="open">Open again</button></div>
+  <div class="ws-home"></div>
+  ${v===1?'<span class="ws-pin" style="left:286px;top:250px">1</span><span class="ws-pin" style="left:4px;top:330px">2</span><span class="ws-pin" style="left:240px;top:84px">3</span>':''}`;
+
+const instances=[];
+/* cubic-bezier(0.45, 0, 0.25, 1) easing, solved for x by Newton steps */
+function cubicBezier(x1,y1,x2,y2){
+  const bx=t=>3*x1*t*(1-t)*(1-t)+3*x2*t*t*(1-t)+t*t*t, by=t=>3*y1*t*(1-t)*(1-t)+3*y2*t*t*(1-t)+t*t*t;
+  const dx=t=>3*x1*(1-t)*(1-t)+6*(x2-x1)*t*(1-t)+3*(1-x2)*t*t;
+  return x=>{let t=x;for(let i=0;i<6;i++){const d=dx(t);if(Math.abs(d)<1e-6)break;t-=(bx(t)-x)/d;t=Math.min(1,Math.max(0,t))}return by(t)};
+}
+const SURGE=cubicBezier(0.45,0,0.25,1);
+const C=150,RT=132,RW=122,G=0.11,TG=0.17,K=14.1,TAU=Math.PI*2;
+const TOTAL=234*60,START_EL=92*60,WASH_END=START_EL+12;
+
+function makeWM(host){
+  const v=+host.dataset.wm, W=+host.dataset.w, k=(W*0.94)/390, pad=W*0.03;
+  const dev=document.createElement('div');dev.className='device';
+  const inW=390*k,inH=873*k;
+  dev.style.width=(inW+pad*2)+'px';dev.style.height=(inH+pad*2)+'px';
+  const inn=document.createElement('div');inn.className='device-in';
+  Object.assign(inn.style,{left:pad+'px',top:pad+'px',width:inW+'px',height:inH+'px',borderRadius:(44*k)+'px'});
+  const ws=document.createElement('div');ws.className='ws v'+v;ws.style.transform=`scale(${k})`;ws.innerHTML=TPL(v);
+  inn.appendChild(ws);dev.appendChild(inn);host.appendChild(dev);
+  const q=s=>ws.querySelector(s);
+  const el={wav:q('.wav'),trk:q('.trk'),time:q('.ws-time'),sec:q('.ws-sec'),secWrap:q('.ws-sec-wrap'),state:q('.ws-state'),temp:q('.ws-temp'),pause:q('[data-a="pause"]'),menu:q('.ws-menu'),sheet:q('.ws-sheet'),scrim:q('.ws-scrim')};
+  const FINAL=v===5, AMP=FINAL?9:7, RWv=FINAL?RW:128, RTv=FINAL?RT:128, Kv=FINAL?K:13;
+  const S={v,prog:0,progT:0,amp:0,ampT:AMP,phase:0,running:true,stopped:false,off:false,finished:false,speed:1,el:START_EL,drying:false,tick:0,mins:142,secs:12,secCount:0,vel:0,ampV:0,progV:0,t:0};
+  let speedBox=null;
+  if(v>=3&&!host.dataset.bare){
+    speedBox=document.createElement('div');speedBox.className='speed';speedBox.setAttribute('role','group');speedBox.setAttribute('aria-label','Скорость демо');
+    speedBox.innerHTML='<button type="button" data-s="1" aria-pressed="true">×1</button><button type="button" data-s="60" aria-pressed="false">×60</button>';
+    host.appendChild(speedBox);
+    speedBox.addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;S.speed=+b.dataset.s;speedBox.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  }
+  if(host.dataset.final){const b=document.createElement('button');b.className='again';b.type='button';b.textContent='Запустить заново';host.appendChild(b);b.addEventListener('click',()=>restart())}
+
+  function fmt(m){return Math.floor(m/60)+'h '+(m%60)+'m'}
+  function setState(t){if(el.state.textContent===t)return;el.state.style.opacity=0;setTimeout(()=>{el.state.textContent=t;el.state.style.opacity=1},200)}
+  function setIcon(play){el.pause.innerHTML=play?ICON.play:ICON.pause;el.pause.setAttribute('aria-label',play?'Продолжить':'Пауза')}
+  function targetProg(){return v>=3?S.el/TOTAL:.394}
+  function restart(){
+    Object.assign(S,{prog:0,amp:0,ampT:AMP,running:true,stopped:false,off:false,finished:false,el:START_EL,drying:false,tick:0,mins:142,secs:12,secCount:0,vel:0,ampV:0,progV:0});
+    S.progT=targetProg();ws.classList.remove('off','closed');
+    el.time.textContent=fmt(142);el.sec.textContent='12 sec';el.secWrap.classList.remove('gone');el.state.textContent='Currently washing';el.temp.textContent='Temperature: 40°';
+    setIcon(false);el.menu.classList.add('hide');closeSheet();
+    ws.querySelectorAll('.ws-in').forEach(n=>{n.style.animation='none';void n.offsetWidth;n.style.animation=''});
+    if(REDUCE){S.prog=S.progT;S.amp=S.ampT}
+  }
+  function closeSheet(){el.sheet.classList.add('hide');el.scrim.classList.add('hide')}
+
+  function pt(th,r){return (C+r*Math.sin(th)).toFixed(1)+' '+(C-r*Math.cos(th)).toFixed(1)}
+  function path(a,b,rf){const n=Math.max(8,Math.ceil(Math.abs(b-a)/0.02));let d='';for(let i=0;i<=n;i++){const t=a+(b-a)*i/n;d+=(i?'L':'M')+pt(t,rf(t,i/n))}return d}
+  const smooth=x=>x>=1?1:x<=0?0:x*x*(3-2*x);
+  /* v4–v5: smooth Bezier curve through sampled points (Catmull-Rom → cubic Bezier) */
+  function bez(p){
+    const f=q=>q[0].toFixed(1)+' '+q[1].toFixed(1);let d='M'+f(p[0]);
+    for(let i=0;i<p.length-1;i++){const p0=p[i-1]||p[i],p1=p[i],p2=p[i+1],p3=p[i+2]||p2;
+      d+='C'+f([p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6])+' '+f([p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6])+' '+f(p2)}
+    return d;
+  }
+  function draw(){
+    const L=Math.min(TAU-2*G-2*TG,Math.max(0,Math.min(S.prog,1)*TAU-G));
+    if(L>0.01&&v>=4){
+      const a0=-G,a1=-G-L,n=Math.max(8,Math.ceil(L/(FINAL?0.02:0.055))),pts=[];
+      for(let i=0;i<=n;i++){
+        const s=L*i/n,th=a0-s;
+        let r;
+        if(FINAL){
+          /* v5: rigid shape, same crest height and spacing everywhere, ends keep the curl like the reference */
+          r=RWv+S.amp*Math.sin(Kv*s-S.phase);
+        }else{
+          /* v4: the model overdid "weight" — skewed crests, swelling envelope, flattened ends */
+          const env=smooth(Math.min(s,L-s)/0.3)*(0.88+0.12*Math.sin(Math.PI*s/L));
+          const u=Kv*s-S.phase;r=RWv+S.amp*env*Math.sin(u+0.38*Math.sin(u));
+        }
+        pts.push([C+r*Math.sin(th),C-r*Math.cos(th)]);
+      }
+      el.wav.setAttribute('d',bez(pts));
+      const t0=a1-TG,t1=-TAU+G;
+      el.trk.setAttribute('d',t0>t1?path(t0,t1,()=>RTv):'');
+    }else if(L>0.01){
+      const a0=-G, a1=-G-L;
+      el.wav.setAttribute('d',path(a0,a1,(t)=>{
+        const s=a0-t;
+        if(v===1) return RWv+S.amp*Math.sin(Kv*s)*Math.sin(S.phase*1.7);
+        const taper=smooth(Math.min(s,L-s)/0.22);
+        return RWv+S.amp*taper*Math.sin(Kv*s-S.phase);
+      }));
+      const t0=a1-TG, t1=-TAU+G;
+      el.trk.setAttribute('d',t0>t1?path(t0,t1,()=>RTv):'');
+    }else{
+      el.wav.setAttribute('d','');
+      el.trk.setAttribute('d',path(0,-TAU+0.001,()=>RTv));
+    }
+  }
+  function step(dt){
+    const e=Math.min(.05,dt);
+    const live=S.running&&!S.off&&!S.stopped&&!S.finished;
+    if(v>=4){
+      /* physics: springs for amplitude and length, inertia for speed; v4 also adds surges and breathing */
+      const n=Math.max(1,Math.ceil(e/0.008)),h=e/n;
+      for(let i=0;i<n;i++){
+        S.t+=h;
+        const aT=FINAL?S.ampT:S.ampT*(1+0.08*Math.sin(S.t*1.3));
+        const kA=120,cA=2*0.55*Math.sqrt(kA);
+        S.ampV+=(-kA*(S.amp-aT)-cA*S.ampV)*h;S.amp+=S.ampV*h;
+        const kP=120,cP=2*0.8*Math.sqrt(kP);
+        S.progV+=(-kP*(S.prog-S.progT)-cP*S.progV)*h;S.prog+=S.progV*h;
+        const vT=(live&&!REDUCE)?Math.PI:0;
+        S.vel+=(vT-S.vel)*(1-Math.exp(-h/0.35));
+        if(FINAL)S.phase+=S.vel*h;
+        else{const u=(S.t%2.4)/2.4,surge=u<.5?SURGE(u*2):SURGE((1-u)*2);S.phase+=S.vel*(0.55+0.9*surge)*h}
+      }
+      if(REDUCE){S.amp=S.ampT;S.prog=S.progT}
+    }else{
+      S.prog+=(S.progT-S.prog)*Math.min(1,e*(S.stopped?4:3));
+      S.amp+=(S.ampT-S.amp)*Math.min(1,e*5);
+      if(!REDUCE&&live)S.phase+=e*Math.PI;
+      if(v===1&&!REDUCE&&live)S.phase+=e*Math.PI*.6;
+    }
+    if(!live)return;
+    if(v>=3){
+      S.el=Math.min(TOTAL,S.el+dt*S.speed);
+      S.progT=S.el/TOTAL;
+      const remMin=Math.ceil((TOTAL-S.el)/60);
+      el.time.textContent=fmt(remMin);
+      if(!S.drying){
+        const left=Math.ceil(WASH_END-S.el);
+        if(left>0)el.sec.textContent=left+' sec';
+        else{S.drying=true;el.secWrap.classList.add('gone');setState('Currently drying');el.temp.textContent='Temperature: 60°'}
+      }
+      if(S.el>=TOTAL){S.finished=true;S.ampT=0;S.progT=1;setState('Done');setIcon(true)}
+    }else{
+      S.tick+=dt;
+      if(S.tick>=1){S.tick-=1;S.secCount++;
+        if(S.secs>0){S.secs--;el.sec.textContent=S.secs+' sec';if(S.secs===0){el.secWrap.classList.add('gone');setState('Currently drying')}}
+        if(S.secCount%60===0){S.mins=Math.max(0,S.mins-1);el.time.textContent=fmt(S.mins)}
+      }
+    }
+  }
+  ws.addEventListener('click',e=>{
+    const b=e.target.closest('[data-a]');
+    if(!e.target.closest('.ws-menu')&&!e.target.closest('[data-a="more"]'))el.menu.classList.add('hide');
+    if(!b)return;const a=b.dataset.a;
+    if(S.off&&a!=='power')return;
+    if(a==='pause'){
+      if(S.stopped||S.finished){restart();return}
+      S.running=!S.running;S.ampT=S.running?AMP:0;setIcon(!S.running);
+      setState(S.running?(S.drying||(v<3&&S.secs===0)?'Currently drying':'Currently washing'):'Paused');
+    }else if(a==='stop'){if(S.stopped||S.finished)return;el.sheet.classList.remove('hide');el.scrim.classList.remove('hide')}
+    else if(a==='cancel')closeSheet();
+    else if(a==='stopok'){closeSheet();S.stopped=true;S.running=false;S.progT=0;S.ampT=0;setIcon(true);setState('Stopped')}
+    else if(a==='power'){S.off=!S.off;ws.classList.toggle('off',S.off)}
+    else if(a==='more'){el.menu.classList.toggle('hide')}
+    else if(a==='menuitem'){el.menu.classList.add('hide')}
+    else if(a==='close'){ws.classList.add('closed')}
+    else if(a==='open'){ws.classList.remove('closed')}
+  });
+  restart();
+  const inst={step,draw,host};instances.push(inst);
+}
+document.querySelectorAll('[data-wm]').forEach(makeWM);
+
+/* one animation loop for all phones; skip ones off screen */
+const visible=new Set(instances);
+if('IntersectionObserver' in window){
+  visible.clear();
+  const io=new IntersectionObserver(es=>es.forEach(en=>{const i=instances.find(x=>x.host===en.target);if(!i)return;en.isIntersecting?visible.add(i):visible.delete(i)}),{rootMargin:'100px'});
+  instances.forEach(i=>io.observe(i.host));
+}
+let last=0;
+function loop(t){const dt=last?Math.min(1,(t-last)/1000):0;last=t;for(let j=instances.length-1;j>=0;j--)if(!instances[j].host.isConnected){visible.delete(instances[j]);instances.splice(j,1)}instances.forEach(i=>{i.step(dt);if(visible.has(i))i.draw()});requestAnimationFrame(loop)}
+instances.forEach(i=>i.draw());
+requestAnimationFrame(loop);
+/* ---------- gating: steps open one at a time ---------- */
+const gates=Array.from(document.querySelectorAll('.gate'));
+let unlocked=store.get('unlocked',1);
+const done=store.get('done',{});
+const smooth=()=>REDUCE_UI?'auto':'smooth';
+function applyGates(){
+  gates.forEach(g=>g.classList.toggle('locked',+g.dataset.gate>unlocked));
+  document.querySelectorAll('.step').forEach(st=>st.classList.toggle('done',!!done[st.dataset.step]));
+  const c=Object.keys(done).filter(k=>done[k]).length;
+  $('#tbCount').textContent=c+' из 10';
+  $('#tbBar').style.width=(c*10)+'%';
+  $('#openAll').hidden=unlocked>=11;
+}
+function openTo(n){if(n>unlocked){unlocked=n;store.set('unlocked',unlocked)}applyGates()}
+function flash(el){el.classList.remove('just-opened');void el.offsetWidth;el.classList.add('just-opened')}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-next]');
+  if(b){
+    const n=+b.dataset.next,was=unlocked;
+    done[n]=true;store.set('done',done);openTo(n+1);
+    const target=n===4?document.getElementById('how'):n===10?document.getElementById('finish'):document.getElementById('step-'+(n+1));
+    if(target){if(n+1>was)flash(target);setTimeout(()=>target.scrollIntoView({behavior:smooth(),block:'start'}),60)}
+    return;
+  }
+  const g=e.target.closest('[data-goto]');
+  if(g){const t=document.getElementById(g.dataset.goto);if(t)t.scrollIntoView({behavior:smooth(),block:'start'})}
+});
+$('#openAll').addEventListener('click',()=>openTo(11));
+applyGates();
+
+/* ---------- sample phone ---------- */
+const pill=$('#samplePill'),modal=$('#sample');
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>es.forEach(en=>{pill.hidden=en.isIntersecting||en.boundingClientRect.top>0})).observe($('#heroFig'));
+}
+pill.addEventListener('click',()=>{modal.hidden=false});
+$('#sampleClose').addEventListener('click',()=>{modal.hidden=true});
+modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true});
+addEventListener('keydown',e=>{if(e.key==='Escape')modal.hidden=true});
+
+/* ---------- approaches tabs ---------- */
+document.querySelectorAll('[data-ap]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-ap]').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('[data-ap-panel]').forEach(p=>{p.hidden=p.dataset.apPanel!==b.dataset.ap});
+}));
+
+/* ---------- longread: each scene drives the simulated chat ---------- */
+(function(){
+  const lr=document.getElementById('how');if(!lr)return;
+  const sim=$('#sim'),scenes=Array.from(lr.querySelectorAll('.scene'));
+  const panels=Array.from(sim.querySelectorAll('[data-scenes]'));
+  const MSG='Сделай прототип экрана по картинке: таймер, волнистое кольцо и две кнопки внизу.';
+  const CODE={
+    5:'<div class="timer">\n  <div class="time">2h 22m</div>\n  <div class="label">remaining</div>\n  <button class="pause">Pause</button>\n</div>',
+    6:".timer { background: black; }\n.time  { font: 40px 'Google Sans';\n         color: white; }\n.label { font-size: 14px; color: gray; }\n.pause { width: 56px; height: 56px;\n         border-radius: 50%;\n         background: #C9E3FB; }",
+    7:"let minutes = 142;\nlet running = true;\n\nsetInterval(() => {\n  if (running) minutes = minutes - 1;\n  showTime(minutes);\n}, 1000);\n\npause.onclick = () => running = !running;"
+  };
+  const bUser=$('#bUser'),bModel=$('#bModel'),typed=$('#cmpTyped'),ph=$('#cmpPh'),send=$('#cmpSend'),composer=$('#composer');
+  const plan=Array.from(sim.querySelectorAll('.bm-plan li')),tech=sim.querySelector('.sp-tech'),diff=sim.querySelector('.sp-diff');
+  const pre=$('#sbPre'),pw=$('#pw'),pwTime=$('#pwTime'),pwLabel=$('#pwLabel');
+  let run=0,cur=-1,tick=null,mins=142,running=true;
+  const wait=ms=>new Promise(r=>setTimeout(r,REDUCE_UI?0:ms));
+  const fmt=m=>Math.floor(m/60)+'h '+(m%60)+'m';
+  function stopTick(){if(tick){clearInterval(tick);tick=null}}
+  function startTick(){stopTick();tick=setInterval(()=>{if(running&&mins>0){mins--;pwTime.textContent=fmt(mins)}},800)}
+  $('#pwBtn').addEventListener('click',()=>{if(!pw.classList.contains('l3'))return;running=!running;pw.classList.toggle('paused',!running);pwLabel.textContent=running?'remaining':'paused'});
+  async function typeTo(el,text,speed,id){
+    if(REDUCE_UI){el.textContent=text;return}
+    el.textContent='';
+    for(let i=0;i<text.length;i+=2){if(id!==run)return;el.textContent=text.slice(0,i+2);await wait(speed)}
+  }
+  function show(n){panels.forEach(p=>p.classList.toggle('show',p.dataset.scenes.split(',').includes(String(n))));sim.dataset.scene=n}
+  function chat(stage){
+    bUser.classList.toggle('in',stage>=1);
+    sim.classList.toggle('hl',stage===2);
+    bModel.classList.toggle('in',stage>=3);
+    composer.style.opacity=stage>=3?'.45':'1';
+  }
+  function resetPreview(){mins=142;running=true;pwTime.textContent=fmt(mins);pwLabel.textContent='remaining'}
+  async function play(n){
+    const id=++run;show(n);
+    if(n<7)stopTick();
+    if(n<=1){
+      chat(0);plan.forEach(l=>l.classList.remove('on'));
+      ph.hidden=true;send.classList.remove('ready');
+      await typeTo(typed,MSG,26,id);if(id!==run)return;
+      send.classList.add('ready');await wait(400);if(id!==run)return;
+      send.classList.add('press');await wait(160);
+      send.classList.remove('press','ready');typed.textContent='';ph.hidden=false;
+      chat(1);
+    }else if(n===2){
+      typed.textContent='';ph.hidden=false;chat(1);
+      await wait(300);if(id!==run)return;chat(2);
+    }else if(n===3){
+      typed.textContent='';ph.hidden=false;chat(3);plan.forEach(l=>l.classList.remove('on'));
+      await wait(800);
+      for(const l of plan){if(id!==run)return;l.classList.add('on');await wait(650)}
+    }else if(n===4){
+      tech.classList.remove('s1','s2','s3');await wait(120);if(id!==run)return;
+      tech.classList.add('s1');await wait(1000);if(id!==run)return;
+      tech.classList.add('s2');await wait(600);if(id!==run)return;
+      tech.classList.add('s3');
+    }else if(n>=5&&n<=7){
+      sim.querySelectorAll('.sb-tabs span').forEach(x=>x.classList.toggle('on',x.dataset.l===String(n)));
+      pw.className='pw '+(n===5?'l1':n===6?'l2':'l3')+(running?'':' paused');
+      if(n===7)startTick();else resetPreview();
+      await typeTo(pre,CODE[n],14,id);
+    }else if(n===8){
+      pw.className='pw l3'+(running?'':' paused');startTick();
+    }else if(n===9){
+      diff.classList.remove('s1','s2','s3');await wait(500);if(id!==run)return;
+      diff.classList.add('s1');await wait(800);if(id!==run)return;
+      diff.classList.add('s2');await wait(1000);if(id!==run)return;
+      diff.classList.add('s3');
+    }
+  }
+  show(0);chat(0);
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>{es.forEach(en=>{
+      if(!en.isIntersecting)return;
+      const n=+en.target.dataset.s;
+      scenes.forEach(sc=>sc.classList.toggle('on',sc===en.target));en.target.classList.add('seen');
+      if(n!==cur){cur=n;play(n)}
+    })},{rootMargin:'-45% 0px -45% 0px'});
+    scenes.forEach(sc=>io.observe(sc));
+  }else{scenes.forEach(sc=>sc.classList.add('on'));play(8)}
+})();
+
+/* ---------- video explainers: scripted screen recordings of a chat service ---------- */
+const VX=[];
+(function(){
+  const PUB={claude:'Опубликовать',chatgpt:'Поделиться',gemini:'Поделиться',v0:'Publish',lovable:'Publish',bolt:'Publish',figma:'Publish'};
+  const CANVAS={chatgpt:1,gemini:1};
+  const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const short=x=>{x=String(x||'').split(' или ')[0].replace(/ \(Mini\)$/,'');return /автоматически/.test(x)?'Авто':x};
+  function P(){
+    const p=PV[pv],m=PVM[pv]||PVM.claude;
+    const auto=/автоматически/.test(m.strong);
+    return {key:pv,name:p.name,site:p.site,strong:short(m.strong),bal:short(m.balanced),fast:short(m.fast),pub:PUB[pv]||'Опубликовать',canvas:!!CANVAS[pv],auto};
+  }
+  function tpl(p){return `
+<div class="m-win">
+  <div class="m-bar"><div class="m-url"><span class="m-lock"></span><span class="m-url-t"></span></div></div>
+  <div class="m-blank">Новая вкладка</div>
+  <div class="m-app">
+    <aside class="m-side"><div class="m-brand">${esc(p.name)}</div><button class="m-new" type="button" tabindex="-1">+ Новый чат</button><div class="m-hist"><i></i><i></i><i></i><i></i></div></aside>
+    <section class="m-main">
+      <header class="m-head"><button class="m-model" type="button" tabindex="-1"><span class="m-model-t">${esc(p.fast)}</span> ▾</button></header>
+      <div class="m-feed"><div class="m-hello">Чем могу помочь?</div></div>
+      <div class="m-comp">
+        <div class="m-att"><img src="ref.jpg" alt=""><span>washing-machine.png</span></div>
+        <div class="m-input"><span class="m-text"></span><span class="m-ph">Напишите сообщение</span><span class="m-kbd">⌘V</span></div>
+        <div class="m-tools"><button class="m-plus" type="button" tabindex="-1">+</button><span class="m-canvas-chip">Canvas</span>${p.auto?'':'<button class="m-think" type="button" tabindex="-1">Размышление</button>'}<span class="m-sp"></span><button class="m-send" type="button" tabindex="-1">↑</button></div>
+        <div class="m-plusmenu"><div class="m-pm">Прикрепить файл</div><div class="m-pm m-pm-canvas">Canvas</div></div>
+      </div>
+      <div class="m-menu">${p.auto?'<div class="m-mi m-mi-strong"><b>Авто</b><span>Сервис выбирает модель сам</span></div>':`<div class="m-mi m-mi-strong"><b>${esc(p.strong)}</b><span>Самая сильная</span></div><div class="m-mi"><b>${esc(p.bal)}</b><span>Средняя</span></div><div class="m-mi"><b>${esc(p.fast)}</b><span>Быстрая</span></div>`}</div>
+    </section>
+    <section class="m-prev"><div class="m-prev-head"><span>Предпросмотр</span><span class="m-ver"><button class="m-ver-prev" type="button" tabindex="-1">‹</button><b class="m-ver-n">v1</b><button type="button" tabindex="-1">›</button></span><button class="m-pub" type="button" tabindex="-1">${esc(p.pub)}</button></div><div class="m-prev-body"><div class="m-phone"></div></div></section>
+  </div>
+  <div class="m-desk"><div class="m-file"><img src="ref.jpg" alt=""><span>washing-machine.png</span></div></div>
+  <div class="m-compare"><div class="mc-col"><span>Картинка</span><div class="mc-img"><img src="ref.jpg" alt=""><i class="mk mk1">1</i><i class="mk mk2">2</i><i class="mk mk3">3</i></div></div><div class="mc-col"><span>Прототип</span><div class="mc-phone"></div></div></div>
+  <div class="m-modal"><b>Ссылка на прототип</b><div class="m-link"><span>https://${esc(p.site)}/share/washing-machine</span><button class="m-copy" type="button" tabindex="-1">Копировать</button></div></div>
+  <div class="m-toast">Ссылка скопирована</div>
+  <div class="m-conn"><b>Коннекторы</b><p>Подключите сервисы, чтобы модель читала их данные.</p><div class="mc-row"><span class="mc-ic">F</span><span class="mc-name">Figma</span><button class="mc-btn" type="button" tabindex="-1">Подключить</button></div><div class="mc-row mc-dim"><span class="mc-ic">G</span><span class="mc-name">Google Drive</span><button class="mc-btn ghost" type="button" tabindex="-1">Подключить</button></div></div>
+  <div class="m-figma"><div class="fg-top"><span class="fg-file">Washing machine</span><span class="fg-zoom">100%</span></div><div class="fg-body"><aside class="fg-layers"><b>Слои</b><div class="fg-l fg-frame">▢ Washing machine</div><div class="fg-l sub">▭ Header</div><div class="fg-l sub">◯ Progress ring</div><div class="fg-l sub">T 2h 22m</div><div class="fg-l sub">▭ Controls</div></aside><div class="fg-canvas"><span class="fg-name">Washing machine</span><div class="fg-art"><img src="ref.jpg" alt=""></div><div class="fg-ctx"><div>Copy</div><div>Copy as PNG</div><div class="fg-ctx-link">Copy link to selection</div></div></div><aside class="fg-insp"><b>Frame</b><span>W 390 · H 844</span><span>Fill #000000</span><span>Auto layout · gap 12</span><b>Text</b><span>Google Sans · 42</span></aside></div></div>
+  <div class="m-mobile"><div class="mm-bar">${esc(p.site)}/share/washing-machine</div><div class="mm-phone"></div></div>
+</div>
+<div class="cursor"><svg viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.6 6.4z"/></svg></div>`}
+
+  const SCRIPTS={
+    1:p=>[['state','blank'],
+      ['cap','Откройте браузер и введите адрес '+p.site],['move','.m-url',800],['click','.m-url'],['type','.m-url-t',p.site,90],['wait',400],['state','app'],['wait',600],
+      ['cap','Войдите в аккаунт, если сервис попросит'],['wait',1600],
+      ...(p.canvas?[['cap','В поле ввода нажмите «+» и включите Canvas'],['move','.m-plus',800],['click','.m-plus'],['add','.m-plusmenu','on'],['wait',300],['move','.m-pm-canvas',600],['add','.m-pm-canvas','hover'],['click','.m-pm-canvas'],['rm','.m-plusmenu','on'],['add','.m-canvas-chip','on'],['wait',700]]:[]),
+      ['cap','Нажмите «Новый чат»'],['move','.m-new',800],['click','.m-new'],['add','.m-new','pressed'],['wait',500],
+      ['cap','Готово: перед вами пустой чат'],['wait',1800]],
+    2:p=>p.auto?[['state','app'],
+      ['cap','Откройте список моделей вверху'],['move','.m-model',900],['click','.m-model'],['add','.m-model','pressed'],['add','.m-menu','on'],['wait',700],
+      ['cap','В '+p.name+' модель выбирается автоматически'],['move','.m-mi-strong',700],['add','.m-mi-strong','hover'],['wait',1600],['rm','.m-menu','on'],['rm','.m-model','pressed'],
+      ['cap','Переключателя размышления нет. Перед сложной задачей попросите план — текст ниже'],['move','.m-input',900],['wait',2400]]:[['state','app'],
+      ['cap','Откройте список моделей вверху'],['move','.m-model',900],['click','.m-model'],['add','.m-model','pressed'],['add','.m-menu','on'],['wait',600],
+      ['cap','Выберите самую сильную: '+p.strong],['move','.m-mi-strong',700],['add','.m-mi-strong','hover'],['click','.m-mi-strong'],['text','.m-model-t',p.strong],['rm','.m-menu','on'],['rm','.m-model','pressed'],['wait',500],
+      ['cap','Включите размышление'],['move','.m-think',900],['click','.m-think'],['add','.m-think','on'],['wait',700],
+      ['cap','Для мелких правок потом переключитесь на быструю: '+p.fast],['wait',2200]],
+    3:p=>[['state','app'],['add','.m-desk','on'],
+      ['cap','Найдите картинку на компьютере'],['move','.m-file img',900],['wait',400],
+      ['cap','Перетащите её в поле сообщения'],['drag','.m-file img','.m-comp',1500],['add','.m-comp','has-att'],['wait',500],
+      ['cap','Картинка прикрепилась. Пока ничего не отправляйте'],['wait',2200]],
+    4:p=>[['state','app'],['think-on'],['add','.m-comp','has-att'],
+      ['cap','Скопируйте текст из шага и вставьте в поле'],['move','.m-input',900],['click','.m-input'],['paste','Сделай интерактивный прототип экрана мобильного приложения по картинке, которую я прикрепил…'],['wait',600],
+      ['cap','Отправьте сообщение'],['move','.m-send',700],['click','.m-send'],['send'],
+      ['cap','Модель думает и пишет код. Это занимает около минуты'],['think',2400],
+      ['cap','Справа появился экран. Это и есть ваш прототип'],['preview'],['wait',2600]],
+    5:p=>[['state','app'],['history'],
+      ['cap','Откройте картинку и прототип рядом'],['compare'],['wait',1400],
+      ['cap','Сверяйте по частям: концы волны'],['add','.mk1','on'],['wait',1300],
+      ['cap','…центр текста'],['add','.mk2','on'],['wait',1200],
+      ['cap','…изгибы и подложку под кольцом'],['add','.mk3','on'],['wait',1500],
+      ['cap','Нашли различия — отправьте сообщение из шага'],['uncompare'],['move','.m-input',800],['click','.m-input'],['paste','Прикладываю исходную картинку ещё раз. Сравни с ней свой результат по частям…'],['move','.m-send',600],['click','.m-send'],['send'],['think',1400],['refresh'],['wait',1200]],
+    6:p=>[['state','app'],['history'],
+      ['cap','Вставьте текст про движение и отправьте'],['move','.m-input',900],['click','.m-input'],['paste','Добавь движение — плавное и спокойное…'],['move','.m-send',600],['click','.m-send'],['send'],['think',1600],['refresh'],
+      ['cap','Проверьте: волна бежит по кругу, время уменьшается'],['move','.m-phone',900],['wait',3000]],
+    7:p=>[['state','app'],['history'],
+      ['cap','Вставьте текст про нажатия и отправьте'],['move','.m-input',900],['click','.m-input'],['paste','Добавь реакцию на нажатия…'],['move','.m-send',600],['click','.m-send'],['send'],['think',1400],['refresh'],
+      ['cap','Нажмите паузу в предпросмотре'],['move','P:[data-a="pause"]',900],['click','P:[data-a="pause"]'],['tap','P:[data-a="pause"]'],['wait',1600],
+      ['cap','Нажмите стоп и подтвердите'],['move','P:[data-a="stop"]',700],['click','P:[data-a="stop"]'],['tap','P:[data-a="stop"]'],['wait',700],['move','P:[data-a="stopok"]',600],['click','P:[data-a="stopok"]'],['tap','P:[data-a="stopok"]'],['wait',1500],
+      ['cap','Так проверьте каждую кнопку'],['wait',1600]],
+    8:p=>[['state','app'],['history'],
+      ['cap','Опишите: что не так → как должно быть → что не трогать'],['move','.m-input',900],['click','.m-input'],['type','.m-text','Время не по центру. Выровняй его строго по центру кольца. Остальное не меняй.',38],['wait',400],
+      ['move','.m-send',600],['click','.m-send'],['send'],['think',1500],['refresh'],
+      ['cap','Проверьте новую версию. Остались замечания — повторите'],['wait',2400]],
+    9:p=>[['state','app'],['history'],['think-off'],
+      ['cap','Одна правка — одно сообщение'],['move','.m-input',900],['click','.m-input'],['type','.m-text','Сделай две кнопки внизу на 8 пикселей больше. Больше ничего не меняй.',38],['wait',400],
+      ['move','.m-send',600],['click','.m-send'],['send'],['think',1100],['refresh'],['wait',700],
+      ['cap','Правка всё сломала? Вернитесь к прошлой версии'],['move','.m-ver-prev',900],['click','.m-ver-prev'],['ver',-1],['refresh'],['wait',2000]],
+    '3f':p=>[['state','app'],['think-on'],
+      ['cap','Подключите Figma один раз в настройках чата'],['add','.m-conn','on'],['wait',500],['move','.mc-btn',900],['click','.mc-btn'],['text','.mc-btn','Подключено ✓'],['add','.mc-btn','done'],['wait',900],['rm','.m-conn','on'],
+      ['cap','Откройте макет в Figma и выделите фрейм'],['text','.m-url-t','figma.com/design/…/Washing-machine'],['add','.m-figma','on'],['wait',500],['move','.fg-frame',900],['click','.fg-frame'],['add','.fg-frame','sel'],['add','.fg-art','sel'],['wait',600],
+      ['cap','Правый клик → Copy link to selection'],['move','.fg-art',700],['click','.fg-art'],['add','.fg-ctx','on'],['wait',300],['move','.fg-ctx-link',600],['add','.fg-ctx-link','hover'],['click','.fg-ctx-link'],['rm','.fg-ctx','on'],['wait',300],
+      ['cap','Вернитесь в чат и вставьте ссылку'],['text','.m-url-t',p.site],['rm','.m-figma','on'],['wait',300],['move','.m-input',800],['click','.m-input'],['paste','figma.com/design/…/Washing-machine?node-id=12-4'],['wait',600],
+      ['cap','После отправки модель читает макет через MCP'],['move','.m-send',600],['click','.m-send'],['send'],['figscan'],['wait',500],
+      ['cap','Экран собран по точным данным из файла'],['preview'],['wait',2200]],
+    10:p=>[['state','app'],['history'],
+      ['cap','Нажмите «'+p.pub+'» над предпросмотром'],['move','.m-pub',900],['click','.m-pub'],['add','.m-modal','on'],['wait',600],
+      ['cap','Скопируйте ссылку'],['move','.m-copy',800],['click','.m-copy'],['add','.m-toast','on'],['wait',1000],['rm','.m-toast','on'],
+      ['cap','Откройте её на телефоне и отправьте коллегам'],['mobile'],['wait',3200]]
+  };
+  const DUR={figscan:()=>FIGDATA.length*450+300,move:a=>a[2],click:()=>320,type:a=>a[2].length*a[3],paste:()=>700,send:()=>500,think:a=>a[1],preview:()=>900,refresh:()=>700,compare:()=>400,uncompare:()=>300,drag:a=>a[3],tap:()=>200,wait:a=>a[1],mobile:()=>600};
+  const FIGDATA=['Фрейм «Washing machine»: 390 × 844','Шрифт Google Sans: 42, 21, 14 px','Кольцо: Ø 280, линия 10 px, #303034','Кнопки: 70 × 70, #C9E3FB, отступ 12','Цвета: #000000, #8BD88B, #E8E8EA'];
+  const dur=a=>(DUR[a[0]]||(()=>0))(a);
+
+  function mkPhone(where,w){
+    const h=document.createElement('div');h.className='wm-host';h.dataset.wm='5';h.dataset.w=String(w);h.dataset.bare='1';
+    where.appendChild(h);makeWM(h);visible.add(instances[instances.length-1]);
+  }
+  const fmtT=ms=>{const s=Math.round(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+  function makeVX(host){
+    const n=host.dataset.vx;
+    host.innerHTML='<div class="vx-stage"><div class="vx-inner"></div><button class="vx-big" type="button" aria-label="Смотреть"><span>▶</span></button></div><div class="cap" aria-live="polite"></div><div class="vx-ctrl"><button class="vx-pp" type="button" aria-label="Пауза">▶</button><div class="vx-track"><i></i></div><span class="vx-time">0:00</span><button class="vx-re" type="button" aria-label="Смотреть сначала">↺</button></div><p class="vx-note"></p>';
+    const stage=host.querySelector('.vx-stage'),inner=host.querySelector('.vx-inner'),bar=host.querySelector('.vx-track i'),time=host.querySelector('.vx-time'),pp=host.querySelector('.vx-pp'),big=host.querySelector('.vx-big'),note=host.querySelector('.vx-note');
+    let k=1;
+    const fit=()=>{k=stage.clientWidth/960||1;inner.style.transform='scale('+k+')'};
+    if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);fit();
+    const S={tok:0,playing:false,started:false,finished:false,elapsed:0,total:1,visible:false,userPaused:false,cx:480,cy:470};
+    const q=sel=>{try{return sel.startsWith('P:')?inner.querySelector('.m-phone '+sel.slice(2)):inner.querySelector(sel)}catch(e){return null}};
+    const SEL=new Set(['add','rm','text','move','type','tap','drag']);
+    const cursor=()=>inner.querySelector('.cursor');
+    function setCursor(x,y){S.cx=x;S.cy=y;const c=cursor();if(c)c.style.transform='translate('+(x-4)+'px,'+(y-2)+'px)'}
+    function center(el){const r=el.getBoundingClientRect(),ir=inner.getBoundingClientRect();return [(r.left+r.width/2-ir.left)/k,(r.top+r.height/2-ir.top)/k]}
+    function ui(){bar.style.width=Math.min(100,S.elapsed/S.total*100)+'%';time.textContent=fmtT(Math.min(S.elapsed,S.total))+' / '+fmtT(S.total)}
+    function setPlaying(b){S.playing=b;pp.textContent=b?'❚❚':'▶';pp.setAttribute('aria-label',b?'Пауза':'Смотреть')}
+    function caption(t){const c=host.querySelector('.cap');c.classList.remove('on');void c.offsetWidth;c.textContent=t;c.classList.add('on')}
+    function build(){
+      const p=P();inner.innerHTML=tpl(p);inner.className='vx-inner st-app';setCursor(480,470);if(n!=='1')inner.querySelector('.m-url-t').textContent=p.site;
+      note.textContent='Схема интерфейса '+p.name+'. В самом сервисе кнопки могут выглядеть и называться немного иначе.';
+      const acts=SCRIPTS[n](p);S.total=acts.reduce((a,x)=>a+dur(x),0)||1;
+      const first=acts.find(a=>a[0]==='state');if(first)inner.className='vx-inner st-'+first[1];
+      const c=acts.find(a=>a[0]==='cap');if(c)caption(c[1]);
+      return acts;
+    }
+    const frame=()=>new Promise(r=>requestAnimationFrame(r));
+    async function wait(ms,tok,on){
+      let t=0,last=performance.now();
+      while(t<ms){await frame();if(tok!==S.tok)throw 'cancel';const now=performance.now(),dt=Math.min(64,now-last);last=now;if(S.playing){t+=dt;S.elapsed+=dt;ui();if(on)on(Math.min(1,t/ms))}}
+      if(on)on(1);
+    }
+    const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    function addHistory(){
+      const f=inner.querySelector('.m-feed');f.innerHTML='<div class="m-u"><img src="ref.jpg" alt=""><span>Сделай интерактивный прототип экрана по картинке…</span></div><div class="m-a">Готово. Экран справа.</div>';
+      inner.querySelector('.m-app').classList.add('prev-open');inner.querySelector('.m-think')?.classList.add('on');
+      inner.querySelector('.m-model-t').textContent=P().strong;
+      if(!inner.querySelector('.m-phone .wm-host'))mkPhone(inner.querySelector('.m-phone'),190);
+    }
+    async function exec(a,tok){
+      const [type,x,y,z]=a,el=SEL.has(type)&&typeof x==='string'?q(x):null;
+      switch(type){
+        case 'state':inner.className='vx-inner st-'+x;break;
+        case 'cap':caption(x);break;
+        case 'add':el&&el.classList.add(y);break;
+        case 'rm':el&&el.classList.remove(y);break;
+        case 'text':if(el)el.textContent=y;break;
+        case 'think-on':inner.querySelector('.m-think')?.classList.add('on');inner.querySelector('.m-model-t').textContent=P().strong;break;
+        case 'think-off':inner.querySelector('.m-think')?.classList.remove('on');inner.querySelector('.m-model-t').textContent=P().fast;break;
+        case 'history':addHistory();break;
+        case 'move':{if(!el)return wait(y,tok);const [tx,ty]=center(el),sx=S.cx,sy=S.cy;await wait(y,tok,t=>{const e=ease(t);setCursor(sx+(tx-sx)*e,sy+(ty-sy)*e)});break}
+        case 'click':{const c=cursor();c.classList.add('press');const r=document.createElement('span');r.className='ripple';r.style.left=S.cx+'px';r.style.top=S.cy+'px';inner.appendChild(r);await wait(160,tok);c.classList.remove('press');await wait(160,tok);r.remove();break}
+        case 'type':{const inp=inner.querySelector('.m-input');if(el===inner.querySelector('.m-text'))inp.classList.add('filled');for(const ch of y){if(el)el.textContent+=ch;await wait(z,tok)}break}
+        case 'paste':{const inp=inner.querySelector('.m-input'),t=inner.querySelector('.m-text'),kb=inner.querySelector('.m-kbd');kb.classList.add('on');await wait(300,tok);t.textContent=x;inp.classList.add('filled');t.classList.add('flash');kb.classList.remove('on');await wait(400,tok);t.classList.remove('flash');break}
+        case 'send':{const f=inner.querySelector('.m-feed'),t=inner.querySelector('.m-text'),comp=inner.querySelector('.m-comp');const hello=f.querySelector('.m-hello');if(hello)hello.remove();
+          const u=document.createElement('div');u.className='m-u';u.innerHTML=(comp.classList.contains('has-att')?'<img src="ref.jpg" alt="">':'')+'<span></span>';u.querySelector('span').textContent=t.textContent;f.appendChild(u);
+          t.textContent='';inner.querySelector('.m-input').classList.remove('filled');comp.classList.remove('has-att');await wait(500,tok);break}
+        case 'think':{const f=inner.querySelector('.m-feed'),m=document.createElement('div');m.className='m-a';m.innerHTML='<span class="d"><i></i><i></i><i></i></span><span>Думаю</span>';f.appendChild(m);await wait(x,tok);m.innerHTML='<span>Готово. Экран справа.</span>';break}
+        case 'preview':{inner.querySelector('.m-app').classList.add('prev-open');if(!inner.querySelector('.m-phone .wm-host'))mkPhone(inner.querySelector('.m-phone'),190);await wait(900,tok);break}
+        case 'refresh':{const pv_=inner.querySelector('.m-prev'),nEl=inner.querySelector('.m-ver-n');pv_.classList.remove('flash');void pv_.offsetWidth;pv_.classList.add('flash');nEl.textContent='v'+(parseInt(nEl.textContent.slice(1))+1);await wait(700,tok);break}
+        case 'ver':{const nEl=inner.querySelector('.m-ver-n');nEl.textContent='v'+Math.max(1,parseInt(nEl.textContent.slice(1))-2);break}
+        case 'compare':{const c=inner.querySelector('.m-compare');c.classList.add('on');if(!c.querySelector('.wm-host'))mkPhone(c.querySelector('.mc-phone'),170);await wait(400,tok);break}
+        case 'uncompare':{inner.querySelector('.m-compare').classList.remove('on');await wait(300,tok);break}
+        case 'tap':{if(el)el.dispatchEvent(new MouseEvent('click',{bubbles:true}));await wait(200,tok);break}
+        case 'drag':{const src=el,dst=q(y);if(!src||!dst)return;const g=document.createElement('img');g.src='ref.jpg';g.className='m-ghost';inner.appendChild(g);
+          const [sx,sy]=center(src),[tx,ty]=center(dst);let over=false;
+          await wait(z,tok,t=>{const e=ease(t),cx=sx+(tx-sx)*e,cy=sy+(ty-sy)*e;setCursor(cx,cy);g.style.left=(cx-43)+'px';g.style.top=(cy-30)+'px';if(t>.75&&!over){over=true;dst.classList.add('drop')}});
+          g.remove();dst.classList.remove('drop');inner.querySelector('.m-desk').classList.remove('on');break}
+        case 'mobile':{const m=inner.querySelector('.m-mobile');m.classList.add('on');inner.querySelector('.m-modal').classList.remove('on');if(!m.querySelector('.wm-host'))mkPhone(m.querySelector('.mm-phone'),170);await wait(600,tok);break}
+        case 'figscan':{const f=inner.querySelector('.m-feed'),m=document.createElement('div');m.className='m-a m-scan';m.innerHTML='<div class="sc-h"><span class="d"><i></i><i></i><i></i></span><span>Читаю макет через Figma</span></div><ul></ul>';f.appendChild(m);const ul=m.querySelector('ul');await wait(300,tok);for(const t of FIGDATA){const li=document.createElement('li');li.textContent=t;ul.appendChild(li);await wait(450,tok)}m.querySelector('.sc-h').innerHTML='<span>Прочитал макет: 5 групп значений</span>';break}
+        case 'wait':await wait(x,tok);break;
+      }
+    }
+    async function run(){
+      const tok=++S.tok;S.elapsed=0;S.finished=false;big.hidden=true;big.classList.remove('replay');
+      const acts=build();ui();
+      try{for(const a of acts){await exec(a,tok)}S.finished=true;setPlaying(false);big.classList.add('replay');big.querySelector('span').textContent='↺';big.setAttribute('aria-label','Смотреть ещё раз');big.hidden=false}
+      catch(e){if(e!=='cancel'){console.error(e);S.finished=true;setPlaying(false);big.classList.add('replay');big.querySelector('span').textContent='↺';big.hidden=false}}
+    }
+    function start(){S.started=true;S.userPaused=false;setPlaying(true);run()}
+    function reset(){S.tok++;S.started=false;S.finished=false;S.elapsed=0;setPlaying(false);build();ui();big.hidden=false;big.classList.remove('replay');big.querySelector('span').textContent='▶';big.setAttribute('aria-label','Смотреть');if(S.visible&&!REDUCE_UI)start()}
+    big.addEventListener('click',start);
+    host.querySelector('.vx-re').addEventListener('click',start);
+    pp.addEventListener('click',()=>{if(!S.started||S.finished){start();return}S.userPaused=S.playing;setPlaying(!S.playing)});
+    build();ui();
+    const api={host,reset,
+      seen(v){S.visible=v;if(v){if(!S.started&&!REDUCE_UI)start();else if(S.started&&!S.finished&&!S.userPaused)setPlaying(true)}else if(S.playing)setPlaying(false)}};
+    VX.push(api);return api;
+  }
+  document.querySelectorAll('[data-vx]').forEach(makeVX);
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>es.forEach(en=>{const v=VX.find(x=>x.host===en.target);if(v)v.seen(en.isIntersecting&&en.intersectionRatio>=.5)}),{threshold:[0,.5,1]});
+    VX.forEach(v=>io.observe(v.host));
+  }
+  $('#pvGrid').addEventListener('click',e=>{if(e.target.closest('[data-k]'))setTimeout(()=>VX.forEach(v=>v.reset()),0)});
+})();
+
+
+/* ---------- source track: picture or Figma ---------- */
+(function(){
+  const FIG={
+    claude:'Подключите Figma один раз: в Claude откройте «Настройки» → «Коннекторы», найдите Figma, нажмите «Подключить» и войдите в Figma.',
+    chatgpt:'Подключите Figma один раз: в настройках ChatGPT найдите Figma в разделе приложений или коннекторов. Доступность зависит от тарифа.',
+    gemini:'В веб-версии Gemini подключения к Figma нет. Используйте картинку или выберите Claude.',
+    v0:'В v0 есть импорт из Figma: вставьте ссылку на фрейм в поле сообщения или в окно импорта.',
+    lovable:'В Lovable прямого подключения к Figma нет. Используйте картинку или плагин импорта из Figma.',
+    bolt:'В Bolt есть импорт из Figma: нажмите импорт и вставьте ссылку на фрейм.',
+    figma:'В Figma Make подключать ничего не нужно: прикрепите фрейм из файла к сообщению.'
+  };
+  let src=store.get('src','image');if(src!=='figma')src='image';
+  function apply(){
+    document.querySelectorAll('[data-src]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.src===src)));
+    document.querySelectorAll('[data-src-panel]').forEach(p=>{p.hidden=p.dataset.srcPanel!==src});
+    document.querySelectorAll('[data-fig="how"]').forEach(el=>{el.textContent=FIG[pv]||FIG.claude});
+  }
+  document.querySelectorAll('[data-src]').forEach(b=>b.addEventListener('click',()=>{src=b.dataset.src;store.set('src',src);apply()}));
+  $('#pvGrid').addEventListener('click',e=>{if(e.target.closest('[data-k]'))setTimeout(apply,0)});
+  apply();
+})();
+
+/* ---------- prompt anatomy: scroll highlights a part and shows its effect ---------- */
+(function(){
+  const box=document.querySelector('.pa');if(!box)return;
+  const scenes=Array.from(box.querySelectorAll('.pa-scene')),viz=box.querySelector('.pa-viz'),pre=box.querySelector('.pa-prompt'),quote=box.querySelector('.pa-quote');
+  let cur=0;
+  function set(n){
+    if(n===cur)return;cur=n;
+    viz.dataset.p=n;box.dataset.p=n;
+    pre.querySelectorAll('[data-p]').forEach(sp=>sp.classList.toggle('on',sp.dataset.p===String(n)));
+    const act=pre.querySelector('[data-p="'+n+'"]');
+    if(act){pre.scrollTo({top:Math.max(0,act.offsetTop-pre.clientHeight/3),behavior:REDUCE_UI?'auto':'smooth'});quote.textContent=act.textContent.replace(/\s+/g,' ').trim()}
+    else quote.textContent='Одно и то же сообщение: сильная модель, быстрая модель, другой сервис.';
+    viz.classList.remove('anim');void viz.offsetWidth;viz.classList.add('anim');
+  }
+  set(1);
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting)return;scenes.forEach(sc=>sc.classList.toggle('on',sc===en.target));en.target.classList.add('seen');set(+en.target.dataset.n)}),{rootMargin:'-45% 0px -45% 0px'});
+    scenes.forEach(sc=>io.observe(sc));
+  }else scenes.forEach(sc=>sc.classList.add('seen'));
+})();
+})();
+</script>
+
+</html>
