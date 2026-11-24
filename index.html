@@ -846,7 +846,7 @@ body{font-size:var(--t-body);line-height:var(--lh-body)}
 .toc .lbl{display:none}
 .toc li.done a{color:var(--ink-2)}
 .toc li.cur a{color:var(--ink)}
-.toc li.cur .dash{width:34px;opacity:1}
+.toc li.cur .dash{opacity:1}
 .toc li.locked .dash{opacity:.25}
 .toc a:not([aria-disabled="true"]):hover .dash,.toc a:focus-visible .dash{opacity:1;color:var(--ink)}
 .toc a:hover .dash,.toc a:focus-visible .dash{background:var(--ink)}
@@ -2350,11 +2350,12 @@ const VX=[];
   function active(){
     const line=innerHeight*.35;let k=0;
     secs.forEach((x,i)=>{if(!x.el.classList.contains('locked')&&x.el.getBoundingClientRect().top<=line)k=i});
-    if(k!==cur){cur=k;secs.forEach((x,i)=>{x.li.classList.toggle('cur',i===k);if(i===k)x.a.setAttribute('aria-current','location');else x.a.removeAttribute('aria-current')})}
+    if(k!==cur){cur=k;secs.forEach((x,i)=>{x.li.classList.toggle('cur',i===k);if(i===k)x.a.setAttribute('aria-current','location');else x.a.removeAttribute('aria-current')});widths()}
   }
   /* dash length follows the section length, like a minimap */
-  function widths(){const hs=secs.map(x=>x.el.getBoundingClientRect().height||1),mx=Math.max(...hs);secs.forEach((x,i)=>x.a.style.setProperty('--w',Math.round(10+14*Math.sqrt(hs[i]/mx))+'px'))}
-  widths();
+  /* current dash is the longest, the others shrink with distance from it */
+  const W=[34,24,18,14,12];
+  function widths(){secs.forEach((x,i)=>x.a.style.setProperty('--w',W[Math.min(Math.abs(i-cur),W.length-1)]+'px'))}
   /* hover preview */
   const card=document.createElement('div');card.className='toc-card';card.setAttribute('aria-hidden','true');document.body.appendChild(card);
   const excerpt=x=>{for(const q of ['.subtitle','.lr-lead','.fin-lead','.todo li','.why']){const e=[...x.el.querySelectorAll(q)].find(n=>!n.closest('.vx,[hidden]')&&n.textContent.trim());if(e)return e.textContent.trim().replace(/\s+/g,' ')}return ''};
@@ -2373,7 +2374,7 @@ const VX=[];
   secs.forEach(x=>{x.a.addEventListener('mouseenter',()=>{if(!toc.classList.contains('open'))show(x)});x.a.addEventListener('focus',()=>{if(!toc.classList.contains('open'))show(x)});x.a.addEventListener('mouseleave',hide);x.a.addEventListener('blur',hide)});
   toc.addEventListener('mouseleave',hide);
   states();active();
-  if('MutationObserver' in window){const mo=new MutationObserver(()=>{states();active();requestAnimationFrame(widths)});secs.forEach(x=>mo.observe(x.el,{attributes:true,attributeFilter:['class']}))}
+  if('MutationObserver' in window){const mo=new MutationObserver(()=>{states();active()});secs.forEach(x=>mo.observe(x.el,{attributes:true,attributeFilter:['class']}))}
   /* phone and keyboard: the counter opens the same list */
   function close(){if(!toc.classList.contains('open'))return;toc.classList.remove('open');btn.setAttribute('aria-expanded','false')}
   btn.addEventListener('click',e=>{e.stopPropagation();const o=!toc.classList.contains('open');toc.classList.toggle('open',o);btn.setAttribute('aria-expanded',String(o));if(o&&e.detail===0){const f=toc.querySelector('li.cur a')||toc.querySelector('a:not([aria-disabled])');f&&f.focus({preventScroll:true})}});
