@@ -769,6 +769,47 @@ button{font-family:inherit}
 .follow:hover{background:var(--ink);color:var(--bg)}
 @media (max-width:560px){.end-card{grid-template-columns:48px minmax(0,1fr);grid-template-areas:"ava head" "body body" "btn btn";column-gap:14px}.end-card > .ava,.end-card > .dd-mark{width:48px;height:48px}.end-card .ava{font-size:16px}.follow{justify-self:start}}
 .end-cards + .foot{margin-top:36px;text-align:left}
+
+/* Spacing system — scale 4·8·12·16·24·32·40·48·96.
+   Proximity: label→title 8, title→meta/lead 12–16, inside a group 20–24, between groups 32–40, between steps and chapters 96 (72 on phones). */
+:root{--sp-section:96px}
+@media (max-width:620px){:root{--sp-section:72px}}
+/* hero: kicker sits on the title, author+meta form one block */
+.hero > .kicker{margin-bottom:-8px}
+.hero > .author{margin-top:12px}
+.hero > .byline{margin-top:-4px}
+.sep{margin:48px 0 0}
+/* steps */
+.step:not(.locked){padding-block:calc(var(--sp-section) / 2)}
+.step-h{gap:8px}
+.step-h > .mode{margin-top:4px}
+.step-body{margin-top:32px;gap:24px}
+.src-panel{gap:24px}
+.step-foot{margin-top:40px}
+.step-body > .vx,.src-panel > .vx{margin-bottom:16px}
+.step-body > .todo + *,.src-panel > .todo + *{margin-top:-4px}
+.step-body > .why,.src-panel > .why{margin-top:8px}
+.pa{margin-block:16px}
+.vx{gap:12px}
+.verify{gap:12px}
+.pa-head{gap:12px}
+.pa-head > .ch-kicker{margin-bottom:-4px}
+.lr-head > .lr-kicker{margin-bottom:-8px}
+.step-body > .pa{margin-block:16px}
+.longread:not(.locked){margin-block:48px}
+/* finish and its chapters */
+.fin-in > .sep{margin:0 0 24px}
+.fin-in > .ch-kicker + .fin-title{margin-top:-16px}
+.fin-in > .fin-title + .fin-lead{margin-top:-8px}
+.chapter-part{gap:24px;padding-top:calc(var(--sp-section) - 24px)}
+.chapter-part > .ch-kicker + h2{margin-top:-16px}
+.chapter-part > h2 + .ch-lead{margin-top:-12px}
+.chapter-part > h3{margin-top:16px}
+.chapter-part > h3 + *{margin-top:-12px}
+.chapter-part > .why{margin-top:8px}
+/* end of page */
+.end-cards{margin-top:var(--sp-section)}
+.end-cards + .foot{margin-top:32px}
 </style>
 
 <header class="topbar">
