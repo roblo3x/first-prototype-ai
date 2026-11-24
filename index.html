@@ -810,6 +810,28 @@ button{font-family:inherit}
 /* end of page */
 .end-cards{margin-top:var(--sp-section)}
 .end-cards + .foot{margin-top:32px}
+
+/* Type system — one size per role, so reading text never jumps.
+   display 64 · h2 40 · statement 32 · h3 22 · lead 22 · body 20 · small 17 · meta 15 · label 13 */
+:root{--t-display:clamp(42px,7vw,64px);--t-h2:clamp(30px,4.6vw,40px);--t-statement:clamp(26px,3.6vw,32px);--t-h3:22px;--t-lead:22px;--t-body:20px;--t-small:17px;--t-meta:15px;--lh-body:1.6}
+@media (max-width:620px){:root{--t-h3:20px;--t-lead:20px;--t-body:18px;--t-small:16px;--t-meta:14px}}
+body{font-size:var(--t-body);line-height:var(--lh-body)}
+/* display and headings */
+.hero h1,.lr-title,.fin-title{font-size:var(--t-display);line-height:1.04;letter-spacing:-.03em}
+.step-h h2,.chapter-part h2,.pa-title{font-size:var(--t-h2);line-height:1.12;letter-spacing:-.02em}
+.sc-big,.pa-big{font-size:var(--t-statement);line-height:1.15}
+.chapter-part h3,.think > b,.opt-card header b,.ap-big,.end-name{font-size:var(--t-h3);line-height:1.3}
+/* lead: one step above body */
+.fin-lead,.ch-lead,.lr-lead,.pa-lead{font-size:var(--t-lead);line-height:1.5}
+/* body: the main reading text */
+.todo li,.start-hint,.think p,.ref p,.ap-note,.chat,.rules ol,.cap{font-size:var(--t-body);line-height:var(--lh-body)}
+.cap{line-height:1.4}
+/* small: asides, cards, chat bubbles */
+.why,.verify-list,.bubble,.thought,.opt-sub,.verdict,.iter-side,.opt-card dl,.end-desc,.pa-small,.sc-small,.pv-note,.model-row,.mcp-box p,.src-lead{font-size:var(--t-small);line-height:var(--lh-body)}
+.src-lead{font-size:var(--t-body)}
+/* meta: captions, notes, secondary UI text */
+.byline,.hero-fig figcaption,.vx-note,.model-use,.ap-facts li,.end-links,.foot,.author-txt span,.end-label,.step-no,.locked-note,.link-btn{font-size:var(--t-meta);line-height:1.5}
+.step-no{font-weight:600}
 </style>
 
 <header class="topbar">
